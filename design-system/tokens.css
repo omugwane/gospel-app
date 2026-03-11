@@ -1,0 +1,14 @@
+/* Design Tokens for Senga App */
+
+:root {
+  /* Colors */
+  --color-primary: violet;
+  --color-secondary: amber;
+  --color-neutral: stone;
+  --color-urgency: red;
+
+  /* Typography */
+  --font-heading: 'DM Sans', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}

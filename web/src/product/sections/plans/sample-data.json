@@ -1,0 +1,170 @@
+{
+  "_meta": {
+    "models": {
+      "plan": "A plan with title, description, duration in days, type (bible, devotional, topical), and optional thumbnail.",
+      "planDay": "A single day within a plan, with an ordered list of content items.",
+      "dayContent": "A content item for a day: video, audio, written message, or passage. Has type, optional refs, text, or mediaUrl.",
+      "userPlanProgress": "User's progress on a plan: planId, status (active, saved, completed), completedDayIds, currentDayNumber.",
+      "category": "A thematic or content-type category for discoverability (e.g., New to Faith, Lent & Easter)."
+    },
+    "relationships": [
+      "Plan has many PlanDay",
+      "PlanDay has many DayContent",
+      "Plan belongs to zero or more Category",
+      "UserPlanProgress belongs to one Plan",
+      "UserPlanProgress tracks completedDayIds and currentDayNumber"
+    ]
+  },
+  "activeFilter": "find",
+  "categories": [
+    { "id": "cat-1", "label": "New to Faith" },
+    { "id": "cat-2", "label": "Lent & Easter" },
+    { "id": "cat-3", "label": "Listen & Watch" },
+    { "id": "cat-4", "label": "Bible" }
+  ],
+  "plans": [
+    {
+      "id": "plan-1",
+      "title": "Walking With John",
+      "description": "A 14-day journey through the Gospel of John. Each day includes a short devotional reflection and key passages. Perfect for new believers or anyone wanting to deepen their understanding of Jesus' life and teachings.",
+      "durationDays": 14,
+      "type": "bible",
+      "thumbnailUrl": "/images/plans/walking-with-john.jpg",
+      "categoryIds": ["cat-1", "cat-4"],
+      "author": "Senga Ministry",
+      "hasAudio": true,
+      "hasVideo": false,
+      "hasPassages": true,
+      "hasWritten": true
+    },
+    {
+      "id": "plan-2",
+      "title": "Peace: A 5-Day Devotional",
+      "description": "Discover peace in God's presence. This short plan explores Galatians 5:22 and related passages, with daily reflections on the fruit of the Spirit.",
+      "durationDays": 5,
+      "type": "devotional",
+      "thumbnailUrl": "/images/plans/peace.jpg",
+      "categoryIds": ["cat-1"],
+      "author": "Pastor Senga",
+      "hasAudio": true,
+      "hasVideo": false,
+      "hasPassages": true,
+      "hasWritten": true
+    },
+    {
+      "id": "plan-3",
+      "title": "The Story Did Not End There",
+      "description": "A 5-day study on Jacob's journey in Genesis 34–35. Reflect on God's faithfulness when life takes unexpected turns. Includes audio summaries for each day.",
+      "durationDays": 5,
+      "type": "bible",
+      "thumbnailUrl": "/images/plans/story-did-not-end.jpg",
+      "categoryIds": ["cat-4"],
+      "author": "Sara Lingel",
+      "hasAudio": true,
+      "hasVideo": false,
+      "hasPassages": true,
+      "hasWritten": true
+    },
+    {
+      "id": "plan-4",
+      "title": "Exodus & Ephesians",
+      "description": "A 12-week (84-day) Bible reading plan through Exodus and the Pauline epistles, with Psalms woven in. Each week has an audio recap.",
+      "durationDays": 84,
+      "type": "bible",
+      "thumbnailUrl": "/images/plans/exodus-eph.jpg",
+      "categoryIds": ["cat-4"],
+      "author": "Senga Ministry",
+      "hasAudio": true,
+      "hasVideo": false,
+      "hasPassages": true,
+      "hasWritten": false
+    },
+    {
+      "id": "plan-5",
+      "title": "Answers to Anxiety",
+      "description": "A 5-day study by Joyce Meyer on finding peace in God's Word. Each day includes a short video teaching and scripture passages.",
+      "durationDays": 5,
+      "type": "devotional",
+      "thumbnailUrl": "/images/plans/anxiety.jpg",
+      "categoryIds": ["cat-3"],
+      "author": "Joyce Meyer",
+      "hasAudio": false,
+      "hasVideo": true,
+      "hasPassages": true,
+      "hasWritten": true
+    },
+    {
+      "id": "plan-6",
+      "title": "Faith That Endures",
+      "description": "A 47-day Lenten journey through Hebrews 11–12. Reflect on the cloud of witnesses and run the race with perseverance.",
+      "durationDays": 47,
+      "type": "bible",
+      "thumbnailUrl": "/images/plans/faith-endures.jpg",
+      "categoryIds": ["cat-2", "cat-4"],
+      "author": "Bob Hoskins",
+      "hasAudio": true,
+      "hasVideo": false,
+      "hasPassages": true,
+      "hasWritten": true
+    }
+  ],
+  "planDays": {
+    "plan-2": [
+      {
+        "dayNumber": 1,
+        "content": [
+          { "id": "dc-1", "type": "written", "title": "Devotional", "textPreview": "Peace begins when we rest in God's presence..." },
+          { "id": "dc-2", "type": "passage", "refs": "Galatians 5:22 MSG", "title": "Galatians 5:22 MSG" }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "content": [
+          { "id": "dc-3", "type": "written", "title": "Devotional", "textPreview": "Joy is not the absence of trouble..." },
+          { "id": "dc-4", "type": "passage", "refs": "Philippians 4:4-7", "title": "Philippians 4:4-7" }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "content": [
+          { "id": "dc-5", "type": "audio", "title": "Day 3 Audio", "durationSeconds": 420, "url": "/audio/peace/day-3.mp3" },
+          { "id": "dc-6", "type": "written", "title": "Devotional", "textPreview": "Patience grows when we trust God's timing..." },
+          { "id": "dc-7", "type": "passage", "refs": "James 1:2-4", "title": "James 1:2-4" }
+        ]
+      },
+      {
+        "dayNumber": 4,
+        "content": [
+          { "id": "dc-8", "type": "written", "title": "Devotional", "textPreview": "Kindness flows from a heart at rest..." },
+          { "id": "dc-9", "type": "passage", "refs": "Ephesians 4:32", "title": "Ephesians 4:32" }
+        ]
+      },
+      {
+        "dayNumber": 5,
+        "content": [
+          { "id": "dc-10", "type": "written", "title": "Devotional", "textPreview": "The fruit of the Spirit is one harvest..." },
+          { "id": "dc-11", "type": "passage", "refs": "Galatians 5:22-25 MSG", "title": "Galatians 5:22-25 MSG" }
+        ]
+      }
+    ]
+  },
+  "userProgress": {
+    "myPlanIds": ["plan-2", "plan-4"],
+    "savedPlanIds": ["plan-3", "plan-6"],
+    "completedPlanIds": ["plan-1"],
+    "planProgress": {
+      "plan-2": {
+        "status": "active",
+        "currentDayNumber": 3,
+        "completedDayIds": [1, 2],
+        "completedContentIds": ["dc-1", "dc-2", "dc-3", "dc-4", "dc-5", "dc-6"]
+      },
+      "plan-4": {
+        "status": "active",
+        "currentDayNumber": 12,
+        "completedDayIds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        "completedContentIds": []
+      }
+    }
+  }
+}

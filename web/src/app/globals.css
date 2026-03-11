@@ -1,0 +1,230 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --color-primary: violet;
+  --color-secondary: amber;
+  --color-neutral: stone;
+  --color-urgency: red;
+
+  --font-heading: 'DM Sans', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Page */
+  --background: #fafaf9;
+  --foreground: #1c1917;
+
+  /* Semantic tokens – light mode */
+  --page-bg: #fafaf9;
+  --page-text: #1c1917;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-bg-solid: #ffffff;
+  --card-border: #e7e5e4;
+  --text-heading: #1c1917;
+  --text-body: #44403c;
+  --text-muted: #78716c;
+  --text-muted-strong: #57534e;
+  --bg-muted: #f5f5f4;
+  --bg-muted-strong: #e7e5e4;
+  --bg-hover: #fafaf9;
+  --border-default: #e7e5e4;
+  --ring-default: #a78bfa;
+  --primary-solid: #7c3aed;
+  --primary-solid-foreground: #ffffff;
+  --primary-muted: rgba(124, 58, 237, 0.1);
+  --primary-muted-foreground: #5b21b6;
+  --surface-bg: rgba(255, 255, 255, 0.6);
+  --surface-border: rgba(231, 229, 228, 0.7);
+  --header-bg: rgba(255, 255, 255, 0.8);
+  --secondary-solid: #d97706;
+  --secondary-solid-foreground: #ffffff;
+  --secondary-muted: rgba(251, 191, 36, 0.3);
+  --secondary-muted-foreground: #b45309;
+  --gradient-from: #fafaf9;
+  --gradient-via: #ffffff;
+  --gradient-to: rgba(245, 243, 255, 0.4);
+  --content-card-bg: rgba(255, 255, 255, 0.9);
+  --content-card-border: rgba(120, 113, 108, 0.5);
+  --input-bg: #ffffff;
+  --input-border: #e7e5e4;
+  --input-text: #1c1917;
+  --badge-bg: #f5f5f4;
+  --badge-text: #44403c;
+  --status-success-bg: #ede9fe;
+  --status-success-text: #5b21b6;
+  --status-success-border: #ddd6fe;
+  --status-processing-bg: #fef3c7;
+  --status-processing-text: #b45309;
+  --status-processing-border: #fde68a;
+  --status-failed-bg: #f5f5f4;
+  --status-failed-text: #44403c;
+  --status-failed-border: #e7e5e4;
+  --submit-bg: #1c1917;
+  --submit-fg: #fafaf9;
+}
+
+html.dark {
+  --background: #0c0a09;
+  --foreground: #fafaf9;
+
+  /* Semantic tokens – dark mode */
+  --page-bg: #0c0a09;
+  --page-text: #fafaf9;
+  --card-bg: rgba(28, 25, 23, 0.4);
+  --card-bg-solid: #0c0a09;
+  --card-border: #44403c;
+  --text-heading: #fafaf9;
+  --text-body: #e7e5e4;
+  --text-muted: #a8a29e;
+  --text-muted-strong: #d6d3d1;
+  --bg-muted: #292524;
+  --bg-muted-strong: #44403c;
+  --bg-hover: #292524;
+  --border-default: #44403c;
+  --ring-default: #a78bfa;
+  --primary-solid: #8b5cf6;
+  --primary-solid-foreground: #1e1b4b;
+  --primary-muted: rgba(139, 92, 246, 0.15);
+  --primary-muted-foreground: #c4b5fd;
+  --surface-bg: rgba(12, 10, 9, 0.6);
+  --surface-border: rgba(68, 64, 60, 0.7);
+  --header-bg: rgba(12, 10, 9, 0.7);
+  --secondary-solid: #f59e0b;
+  --secondary-solid-foreground: #422006;
+  --secondary-muted: rgba(245, 158, 11, 0.15);
+  --secondary-muted-foreground: #fcd34d;
+  --gradient-from: #0c0a09;
+  --gradient-via: #0c0a09;
+  --gradient-to: #1c1917;
+  --content-card-bg: rgba(28, 25, 23, 0.9);
+  --content-card-border: rgba(120, 113, 108, 0.5);
+  --input-bg: #1c1917;
+  --input-border: #57534e;
+  --input-text: #fafaf9;
+  --badge-bg: #44403c;
+  --badge-text: #fafaf9;
+  --status-success-bg: rgba(139, 92, 246, 0.2);
+  --status-success-text: #c4b5fd;
+  --status-success-border: rgba(139, 92, 246, 0.4);
+  --status-processing-bg: rgba(245, 158, 11, 0.2);
+  --status-processing-text: #fcd34d;
+  --status-processing-border: rgba(245, 158, 11, 0.4);
+  --status-failed-bg: #44403c;
+  --status-failed-text: #fafaf9;
+  --status-failed-border: #78716c;
+  --submit-bg: #f5f5f4;
+  --submit-fg: #1c1917;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-dm-sans);
+  --font-mono: var(--font-ibm-plex-mono);
+
+  /* Theme-aware semantic tokens (adapt to light/dark) */
+  --color-page-bg: var(--page-bg);
+  --color-page-text: var(--page-text);
+  --color-card-bg: var(--card-bg);
+  --color-card-bg-solid: var(--card-bg-solid);
+  --color-card-border: var(--card-border);
+  --color-heading: var(--text-heading);
+  --color-body: var(--text-body);
+  --color-muted: var(--text-muted);
+  --color-muted-strong: var(--text-muted-strong);
+  --color-muted-bg: var(--bg-muted);
+  --color-muted-bg-strong: var(--bg-muted-strong);
+  --color-hover-bg: var(--bg-hover);
+  --color-border-default: var(--border-default);
+  --color-ring-default: var(--ring-default);
+  --color-primary-solid: var(--primary-solid);
+  --color-primary-solid-fg: var(--primary-solid-foreground);
+  --color-primary-muted: var(--primary-muted);
+  --color-primary-muted-fg: var(--primary-muted-foreground);
+  --color-surface-bg: var(--surface-bg);
+  --color-surface-border: var(--surface-border);
+  --color-header-bg: var(--header-bg);
+  --color-secondary-solid: var(--secondary-solid);
+  --color-secondary-solid-fg: var(--secondary-solid-foreground);
+  --color-secondary-muted: var(--secondary-muted);
+  --color-secondary-muted-fg: var(--secondary-muted-foreground);
+  --color-gradient-from: var(--gradient-from);
+  --color-gradient-via: var(--gradient-via);
+  --color-gradient-to: var(--gradient-to);
+  --color-content-card-bg: var(--content-card-bg);
+  --color-content-card-border: var(--content-card-border);
+  --color-input-bg: var(--input-bg);
+  --color-input-border: var(--input-border);
+  --color-input-text: var(--input-text);
+  --color-badge-bg: var(--badge-bg);
+  --color-badge-text: var(--badge-text);
+  --color-status-success-bg: var(--status-success-bg);
+  --color-status-success-text: var(--status-success-text);
+  --color-status-success-border: var(--status-success-border);
+  --color-status-processing-bg: var(--status-processing-bg);
+  --color-status-processing-text: var(--status-processing-text);
+  --color-status-processing-border: var(--status-processing-border);
+  --color-status-failed-bg: var(--status-failed-bg);
+  --color-status-failed-text: var(--status-failed-text);
+  --color-status-failed-border: var(--status-failed-border);
+  --color-submit-bg: var(--submit-bg);
+  --color-submit-fg: var(--submit-fg);
+
+  /* Palette aliases (primary=violet, secondary=amber, neutral=stone, urgency=red) */
+  --color-primary-50: var(--color-violet-50);
+  --color-primary-100: var(--color-violet-100);
+  --color-primary-200: var(--color-violet-200);
+  --color-primary-300: var(--color-violet-300);
+  --color-primary-400: var(--color-violet-400);
+  --color-primary-500: var(--color-violet-500);
+  --color-primary-600: var(--color-violet-600);
+  --color-primary-700: var(--color-violet-700);
+  --color-primary-800: var(--color-violet-800);
+  --color-primary-900: var(--color-violet-900);
+  --color-primary-950: var(--color-violet-950);
+
+  --color-secondary-50: var(--color-amber-50);
+  --color-secondary-100: var(--color-amber-100);
+  --color-secondary-200: var(--color-amber-200);
+  --color-secondary-300: var(--color-amber-300);
+  --color-secondary-400: var(--color-amber-400);
+  --color-secondary-500: var(--color-amber-500);
+  --color-secondary-600: var(--color-amber-600);
+  --color-secondary-700: var(--color-amber-700);
+  --color-secondary-800: var(--color-amber-800);
+  --color-secondary-900: var(--color-amber-900);
+  --color-secondary-950: var(--color-amber-950);
+
+  --color-neutral-50: var(--color-stone-50);
+  --color-neutral-100: var(--color-stone-100);
+  --color-neutral-200: var(--color-stone-200);
+  --color-neutral-300: var(--color-stone-300);
+  --color-neutral-400: var(--color-stone-400);
+  --color-neutral-500: var(--color-stone-500);
+  --color-neutral-600: var(--color-stone-600);
+  --color-neutral-700: var(--color-stone-700);
+  --color-neutral-800: var(--color-stone-800);
+  --color-neutral-900: var(--color-stone-900);
+  --color-neutral-950: var(--color-stone-950);
+
+  --color-urgency-50: var(--color-red-50);
+  --color-urgency-100: var(--color-red-100);
+  --color-urgency-200: var(--color-red-200);
+  --color-urgency-300: var(--color-red-300);
+  --color-urgency-400: var(--color-red-400);
+  --color-urgency-500: var(--color-red-500);
+  --color-urgency-600: var(--color-red-600);
+  --color-urgency-700: var(--color-red-700);
+  --color-urgency-800: var(--color-red-800);
+  --color-urgency-900: var(--color-red-900);
+  --color-urgency-950: var(--color-red-950);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}

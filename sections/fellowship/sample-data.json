@@ -1,0 +1,278 @@
+{
+  "_meta": {
+    "models": {
+      "fellowshipPresence": "Live participation context shown at the top of the Fellowship hub.",
+      "testimony": "A public story of God's work shared by a believer, with optional media and reactions.",
+      "prayerPoint": "A prayer request users can commit to pray for, optionally restricted to ministry intercessors.",
+      "counselingRequest": "A private support request submitted to the counseling team with triage details."
+    },
+    "relationships": [
+      "A testimony belongs to one user identity (named or anonymous) and can include zero or one media attachment.",
+      "A prayer point can receive many prayer commitments from users, represented by prayedCount.",
+      "A counseling request belongs to one user and progresses through statuses: Received, In Review, Scheduled.",
+      "Fellowship presence is shared context for all three cards in the hub."
+    ]
+  },
+  "fellowshipPresence": {
+    "onlineBelievers": 245,
+    "lastUpdatedAt": "2026-03-06T08:30:00Z",
+    "headline": "Believers are currently in fellowship"
+  },
+  "testimonies": [
+    {
+      "id": "tes-001",
+      "displayName": "Aline M.",
+      "isAnonymous": false,
+      "location": "Kigali",
+      "content": "After weeks of fear, the Lord gave me peace during morning prayer. I slept well for the first time in months.",
+      "createdAt": "2026-03-05T06:10:00Z",
+      "reactions": {
+        "praiseGodCount": 38,
+        "shareCount": 7,
+        "viewerPraised": false
+      },
+      "media": []
+    },
+    {
+      "id": "tes-002",
+      "displayName": "Anonymous",
+      "isAnonymous": true,
+      "location": "Paris",
+      "content": "I prayed for reconciliation with my brother, and yesterday we spoke after three years of silence. Imana is faithful.",
+      "createdAt": "2026-03-05T12:40:00Z",
+      "reactions": {
+        "praiseGodCount": 56,
+        "shareCount": 10,
+        "viewerPraised": true
+      },
+      "media": [
+        {
+          "type": "audio",
+          "url": "/media/testimonies/tes-002-audio.mp3",
+          "durationSeconds": 26
+        }
+      ]
+    },
+    {
+      "id": "tes-003",
+      "displayName": "Claude N.",
+      "isAnonymous": false,
+      "location": "Kampala",
+      "content": "I was looking for work for five months. The church prayed with me, and this week I started a new job. I am grateful for every prayer.",
+      "createdAt": "2026-03-04T19:05:00Z",
+      "reactions": {
+        "praiseGodCount": 44,
+        "shareCount": 5,
+        "viewerPraised": false
+      },
+      "media": [
+        {
+          "type": "image",
+          "url": "/media/testimonies/tes-003-image.jpg"
+        }
+      ]
+    },
+    {
+      "id": "tes-004",
+      "displayName": "Anonymous",
+      "isAnonymous": true,
+      "location": "Rubavu",
+      "content": "I had hidden anxiety for a long time and smiled in public while feeling empty inside. Over the past month, through daily verses, short exhortations, and consistent prayer from believers here, I started rebuilding daily routines, sleeping better, and talking honestly with my family. I am still in process, but I can now say with confidence that God met me in this dark season and gave me hope again.",
+      "createdAt": "2026-03-03T21:12:00Z",
+      "reactions": {
+        "praiseGodCount": 71,
+        "shareCount": 14,
+        "viewerPraised": true
+      },
+      "media": []
+    },
+    {
+      "id": "tes-005",
+      "displayName": "Jeanne U.",
+      "isAnonymous": false,
+      "location": "Brussels",
+      "content": "My son passed his exams after we prayed together every evening. Murakoze Yesu.",
+      "createdAt": "2026-03-02T16:30:00Z",
+      "reactions": {
+        "praiseGodCount": 29,
+        "shareCount": 4,
+        "viewerPraised": false
+      },
+      "media": []
+    },
+    {
+      "id": "tes-006",
+      "displayName": "Eric B.",
+      "isAnonymous": false,
+      "location": "Butare",
+      "content": "Thank you for praying for my mother. Her recovery is improving week by week.",
+      "createdAt": "2026-03-01T10:15:00Z",
+      "reactions": {
+        "praiseGodCount": 33,
+        "shareCount": 3,
+        "viewerPraised": false
+      },
+      "media": []
+    }
+  ],
+  "prayerPoints": [
+    {
+      "id": "pray-001",
+      "title": "Healing for my mother",
+      "details": "Please pray for full recovery after surgery this week.",
+      "category": "Health",
+      "visibility": "Public",
+      "submittedBy": "Anonymous",
+      "createdAt": "2026-03-06T05:30:00Z",
+      "prayedCount": 22,
+      "viewerHasPrayed": false,
+      "tags": [
+        "Health"
+      ]
+    },
+    {
+      "id": "pray-002",
+      "title": "Wisdom in our marriage",
+      "details": "We need peace in communication and patience with each other.",
+      "category": "Family",
+      "visibility": "Public",
+      "submittedBy": "Nadine K.",
+      "createdAt": "2026-03-05T18:20:00Z",
+      "prayedCount": 31,
+      "viewerHasPrayed": true,
+      "tags": [
+        "Family"
+      ]
+    },
+    {
+      "id": "pray-003",
+      "title": "School fees provision",
+      "details": "Pray for financial breakthrough before next term starts.",
+      "category": "Finances",
+      "visibility": "Public",
+      "submittedBy": "Anonymous",
+      "createdAt": "2026-03-05T09:10:00Z",
+      "prayedCount": 18,
+      "viewerHasPrayed": false,
+      "tags": [
+        "Finances"
+      ]
+    },
+    {
+      "id": "pray-004",
+      "title": "Return to God",
+      "details": "I want to fully return to prayer and repentance after a hard season.",
+      "category": "Repentance",
+      "visibility": "Public",
+      "submittedBy": "Anonymous",
+      "createdAt": "2026-03-04T07:05:00Z",
+      "prayedCount": 40,
+      "viewerHasPrayed": true,
+      "tags": [
+        "Repentance"
+      ]
+    },
+    {
+      "id": "pray-005",
+      "title": "Ministry planning burden",
+      "details": "Requesting intercessory prayer for leadership decisions this month.",
+      "category": "Spiritual Growth",
+      "visibility": "Ministry Only",
+      "submittedBy": "Leader Team",
+      "createdAt": "2026-03-03T13:45:00Z",
+      "prayedCount": 9,
+      "viewerHasPrayed": false,
+      "tags": [
+        "Spiritual Growth"
+      ]
+    },
+    {
+      "id": "pray-006",
+      "title": "Youth conference preparation",
+      "details": "Pray for unity among volunteers and safety for travel.",
+      "category": "Youth",
+      "visibility": "Public",
+      "submittedBy": "Samuel T.",
+      "createdAt": "2026-03-02T11:00:00Z",
+      "prayedCount": 15,
+      "viewerHasPrayed": false,
+      "tags": [
+        "Youth",
+        "Family"
+      ]
+    },
+    {
+      "id": "pray-007",
+      "title": "Quiet request",
+      "details": "Personal burden. Please pray as God leads.",
+      "category": "Health",
+      "visibility": "Public",
+      "submittedBy": "Anonymous",
+      "createdAt": "2026-03-01T20:55:00Z",
+      "prayedCount": 11,
+      "viewerHasPrayed": false,
+      "tags": []
+    }
+  ],
+  "counselingRequests": [
+    {
+      "id": "cns-001",
+      "category": "Marriage/Family",
+      "preferredMethod": "WhatsApp Call",
+      "description": "Need help navigating repeated conflict with my spouse around finances and parenting decisions.",
+      "status": "In Review",
+      "submittedAt": "2026-03-05T14:30:00Z",
+      "nextStep": "Counseling team will contact you within 48 hours.",
+      "isConfidential": true
+    },
+    {
+      "id": "cns-002",
+      "category": "Business",
+      "preferredMethod": "Email",
+      "description": "Looking for prayer and guidance before making a major business partnership decision.",
+      "status": "Received",
+      "submittedAt": "2026-03-06T06:45:00Z",
+      "nextStep": "Request received and queued for triage.",
+      "isConfidential": true
+    },
+    {
+      "id": "cns-003",
+      "category": "Spiritual Growth",
+      "preferredMethod": "In-person at church",
+      "description": "I need mentoring support to rebuild discipline in scripture reading and prayer.",
+      "status": "Scheduled",
+      "submittedAt": "2026-03-02T08:15:00Z",
+      "nextStep": "Session booked for Sunday after second service.",
+      "isConfidential": true
+    },
+    {
+      "id": "cns-004",
+      "category": "Youth",
+      "preferredMethod": "WhatsApp Call",
+      "description": "Requesting counseling for recurring anxiety and fear about future studies.",
+      "status": "In Review",
+      "submittedAt": "2026-03-04T17:55:00Z",
+      "nextStep": "Assigned counselor will confirm a time window.",
+      "isConfidential": true
+    },
+    {
+      "id": "cns-005",
+      "category": "Crisis",
+      "preferredMethod": "WhatsApp Call",
+      "description": "Urgent family crisis and need immediate spiritual support.",
+      "status": "Received",
+      "submittedAt": "2026-03-06T07:50:00Z",
+      "nextStep": "Priority review in progress.",
+      "isConfidential": true
+    }
+  ],
+  "availablePrayerTags": [
+    "Health",
+    "Family",
+    "Finances",
+    "Repentance",
+    "Spiritual Growth",
+    "Youth"
+  ],
+  "myPrayerCommitments": []
+}

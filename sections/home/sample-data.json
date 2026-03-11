@@ -1,0 +1,175 @@
+{
+  "_meta": {
+    "models": {
+      "viewer": "Current signed-in user context used for greeting and personalization.",
+      "dailyManna": "Top-of-home spiritual anchor containing the verse of the day and short daily exhortation.",
+      "activeJourney": "Current plan progress card showing where the user is and the next devotional step.",
+      "liveUrgent": "Conditional row describing live ministry activity and urgent upcoming prayer moments.",
+      "fellowshipHighlight": "Community pulse content on home (testimony snippet and prayer participation signal).",
+      "mediaResume": "Last played sermon/media item the user can continue from where they left off.",
+      "seriesCard": "Quick-access card for newest sermon/devotional series shown in horizontal scroll."
+    },
+    "relationships": [
+      "viewer has one dailyManna experience per day",
+      "activeJourney references the viewer's selected plan and next reading",
+      "liveUrgent combines stream state and upcoming prayer event visibility",
+      "fellowshipHighlight aggregates testimony and prayer pulse from fellowship activity",
+      "mediaResume links to one content item and one parent series",
+      "seriesCard items are navigable destinations into the Library section"
+    ]
+  },
+  "viewer": {
+    "userId": "usr_001",
+    "displayName": "Aline",
+    "locale": "rw",
+    "dayPart": "morning"
+  },
+  "greetings": {
+    "rw": {
+      "morning": "Mwaramutse",
+      "afternoon": "Mwiriwe",
+      "evening": "Mwiriwe neza"
+    },
+    "en": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "fr": {
+      "morning": "Bonjour",
+      "afternoon": "Bon après-midi",
+      "evening": "Bonsoir"
+    }
+  },
+  "dailyManna": {
+    "date": "2026-03-08",
+    "verse": {
+      "id": "verse_2026_03_08",
+      "reference": "Daniel 6:10",
+      "translations": {
+        "rw": {
+          "text": "Daniyeli akimara kumenya ko itegeko ryashyizweho umukono, ajya iwe, apfukama gatatu ku munsi, asenga kandi ashimira Imana ye."
+        },
+        "en": {
+          "text": "When Daniel knew that the document had been signed, he went to his house, got down on his knees three times a day, and prayed and gave thanks before his God."
+        },
+        "fr": {
+          "text": "Quand Daniel sut que l'écrit était signé, il rentra chez lui, se mit à genoux trois fois par jour, et pria son Dieu en le louant."
+        }
+      },
+      "share": {
+        "enabled": true,
+        "target": "whatsapp"
+      }
+    },
+    "dailyImbuguro": {
+      "id": "imp_2026_03_08",
+      "title": "Imbaraga zo gusenga mu gitutu",
+      "durationSeconds": 126,
+      "audioUrl": "https://cdn.example.org/senga/home/imp_2026_03_08.mp3",
+      "summary": "Ijambo rigufi rya minota ibiri rikomeza umutima wawe mbere yo gutangira umunsi.",
+      "transcript": "Uyu munsi twibuke ko Daniyeli yasengaga no mu gihe amategeko y'ubwami yamuhangaga. Nubwo ibibazo bitugeraho mu buryo butandukanye, umutekano nyawo w'umukristo utangirira ku mavi. Fata iminota ibiri, uhagarare mu mutima, usenge uti: Mwami, mpereza ubutwari bwo kukwizera mu gitutu. Uko umunsi ugenda uhinduka, ugume ku Ijambo, kandi usangize undi iri humure."
+    }
+  },
+  "activeJourney": {
+    "planId": "plan_52wk_main",
+    "planTitle": "Urugendo rw'Imyaka 52",
+    "week": 42,
+    "day": 3,
+    "todayReading": "Daniel 6",
+    "progressPercent": 80.8,
+    "ctaLabel": "Continue Reading"
+  },
+  "liveUrgent": {
+    "isVisible": true,
+    "liveNow": {
+      "status": "live",
+      "title": "Pastor Senga Live Prayer",
+      "platform": "YouTube",
+      "startedAt": "2026-03-08T16:05:00Z",
+      "watchUrl": "https://youtube.com/live/example"
+    },
+    "upcomingPrayer": {
+      "id": "prayer_903",
+      "title": "Prayer Marathon",
+      "startsInHours": 2,
+      "startsAt": "2026-03-08T18:00:00Z",
+      "participantPreview": []
+    }
+  },
+  "fellowshipHighlights": {
+    "testimonySnippet": {
+      "id": "test_118",
+      "author": "Anonymous",
+      "title": "God healed my family after the Daniel series",
+      "snippet": "Nyuma y'amasomo ya Daniyeli, umuryango wacu wongeye kubana mu mahoro. Twongeye gusengera hamwe buri mugoroba.",
+      "postedAt": "2026-03-08T09:12:00Z"
+    },
+    "prayerPulse": {
+      "activeCount": 14,
+      "prompt": "14 people are praying right now. Join them?"
+    }
+  },
+  "mediaShortcuts": {
+    "continueItem": {
+      "id": "media_resume_77",
+      "seriesId": "ser_kingdom_prayer",
+      "seriesTitle": "Kingdom Prayer",
+      "itemTitle": "Episode 7: Guarding the Night Watch",
+      "progressPercent": 37,
+      "remainingMinutes": 18,
+      "kind": "audio"
+    },
+    "newestSeries": [
+      {
+        "id": "ser_kingdom_prayer",
+        "title": "Kingdom Prayer",
+        "thumbnailUrl": "https://images.example.org/senga/series/kingdom-prayer.jpg",
+        "itemCount": 12,
+        "updatedAt": "2026-03-07T21:00:00Z"
+      },
+      {
+        "id": "ser_daniel_nights",
+        "title": "Nights with Daniel",
+        "thumbnailUrl": "https://images.example.org/senga/series/daniel-nights.jpg",
+        "itemCount": 9,
+        "updatedAt": "2026-03-06T19:30:00Z"
+      },
+      {
+        "id": "ser_altar_fire",
+        "title": "Altar Fire",
+        "thumbnailUrl": "https://images.example.org/senga/series/altar-fire.jpg",
+        "itemCount": 15,
+        "updatedAt": "2026-03-05T18:22:00Z"
+      },
+      {
+        "id": "ser_family_peace",
+        "title": "Peace in the Home",
+        "thumbnailUrl": "https://images.example.org/senga/series/family-peace.jpg",
+        "itemCount": 7,
+        "updatedAt": "2026-03-04T16:10:00Z"
+      },
+      {
+        "id": "ser_call_to_pray",
+        "title": "Call to Pray",
+        "thumbnailUrl": "https://images.example.org/senga/series/call-to-pray.jpg",
+        "itemCount": 11,
+        "updatedAt": "2026-03-03T12:45:00Z"
+      },
+      {
+        "id": "ser_gentle_strength",
+        "title": "Gentle Strength",
+        "thumbnailUrl": "https://images.example.org/senga/series/gentle-strength.jpg",
+        "itemCount": 6,
+        "updatedAt": "2026-03-01T08:20:00Z"
+      }
+    ]
+  },
+  "detailRoutes": {
+    "verse": "/home/verse/verse_2026_03_08",
+    "exhortation": "/home/exhortation/imp_2026_03_08",
+    "live": "/home/live/live_2026_03_08",
+    "testimony": "/fellowship/testimony/test_118",
+    "media": "/library/series/ser_kingdom_prayer"
+  }
+}

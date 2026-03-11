@@ -1,0 +1,406 @@
+{
+  "_meta": {
+    "models": {
+      "series": "A curated collection that groups sermons into a structured set (e.g., Book studies, themes like Family).",
+      "topic": "A tag-like grouping used to browse sermons by theme (e.g., Prayer, Repentance, Family).",
+      "sermon": "A teaching message with metadata and attached media assets for listening/watching.",
+      "mediaAsset": "A playable media file attached to a sermon (audio and/or video).",
+      "download": "A record that a media asset has been saved locally for offline listening."
+    },
+    "relationships": [
+      "series has many sermons",
+      "sermon belongs to one series (optional; some sermons may be standalone)",
+      "sermon has many topics",
+      "sermon has many mediaAsset (audio and optional video)",
+      "download belongs to one mediaAsset"
+    ]
+  },
+  "languageOptions": [
+    { "code": "rw", "label": "Kinyarwanda" },
+    { "code": "en", "label": "English" },
+    { "code": "fr", "label": "Français" }
+  ],
+  "viewer": {
+    "userId": "usr_001",
+    "displayName": "Demo User",
+    "preferredLanguage": "rw"
+  },
+  "topics": [
+    {
+      "id": "top_prayer",
+      "label": "Isengesho",
+      "translations": { "en": { "label": "Prayer" }, "fr": { "label": "Prière" } }
+    },
+    {
+      "id": "top_repentance",
+      "label": "Kwihana",
+      "translations": { "en": { "label": "Repentance" }, "fr": { "label": "Repentance" } }
+    },
+    {
+      "id": "top_family",
+      "label": "Umuryango",
+      "translations": { "en": { "label": "Family" }, "fr": { "label": "Famille" } }
+    },
+    {
+      "id": "top_fasting",
+      "label": "Gusiba",
+      "translations": { "en": { "label": "Fasting" }, "fr": { "label": "Jeûne" } }
+    },
+    {
+      "id": "top_faith",
+      "label": "Ukwizera",
+      "translations": { "en": { "label": "Faith" }, "fr": { "label": "Foi" } }
+    },
+    {
+      "id": "top_spiritual_warfare",
+      "label": "Urugamba rw’Umwuka",
+      "translations": { "en": { "label": "Spiritual warfare" }, "fr": { "label": "Combat spirituel" } }
+    }
+  ],
+  "series": [
+    {
+      "id": "ser_daniel",
+      "title": "Igitabo cya Daniyeli",
+      "description": "Urukurikirane rugaragaza ukwizera mu bihe by’igitutu, ubuhanuzi, n’ubudahemuka.",
+      "sermonCount": 6,
+      "topicIds": ["top_faith", "top_spiritual_warfare"],
+      "translations": {
+        "en": {
+          "title": "The Book of Daniel",
+          "description": "A series on faith under pressure, prophecy, and steadfastness."
+        },
+        "fr": {
+          "title": "Le livre de Daniel",
+          "description": "Une série sur la foi sous pression, la prophétie et la fidélité."
+        }
+      }
+    },
+    {
+      "id": "ser_family",
+      "title": "Urugo n'Umuryango",
+      "description": "Urukurikirane ku rukundo, indangagaciro, no kubaka amahoro mu muryango.",
+      "sermonCount": 5,
+      "topicIds": ["top_family"],
+      "translations": {
+        "en": {
+          "title": "Home & Family",
+          "description": "Teachings on love, values, and building peace in the family."
+        },
+        "fr": {
+          "title": "Foyer & Famille",
+          "description": "Enseignements sur l’amour, les valeurs et la paix dans la famille."
+        }
+      }
+    },
+    {
+      "id": "ser_prayer",
+      "title": "Imbaraga z'Isengesho",
+      "description": "Uko gusenga bihindura umutima, bigasana urugo, bigatanga imbaraga mu rugamba.",
+      "sermonCount": 5,
+      "topicIds": ["top_prayer", "top_spiritual_warfare"],
+      "translations": {
+        "en": {
+          "title": "The Power of Prayer",
+          "description": "How prayer reshapes the heart, heals the home, and strengthens the fight."
+        },
+        "fr": {
+          "title": "La puissance de la prière",
+          "description": "Comment la prière transforme le cœur, guérit le foyer et fortifie le combat."
+        }
+      }
+    },
+    {
+      "id": "ser_repentance_path",
+      "title": "Inzira yo Kwihana",
+      "description": "Urugendo rutunganya umutima: intambwe ku yindi mu kwihana no gukura mu kwizera.",
+      "sermonCount": 4,
+      "topicIds": ["top_repentance", "top_faith"],
+      "translations": {
+        "en": {
+          "title": "The Path of Repentance",
+          "description": "A step-by-step journey of repentance and growth in faith."
+        },
+        "fr": {
+          "title": "Le chemin de la repentance",
+          "description": "Un cheminement étape par étape de repentance et de croissance dans la foi."
+        }
+      }
+    }
+  ],
+  "sermons": [
+    {
+      "id": "srm_dan_06",
+      "title": "Daniyeli 6: Isengesho ryo mu gitutu",
+      "publishedAt": "2026-02-18T05:00:00Z",
+      "durationSeconds": 2820,
+      "scriptureReferences": ["Daniel 6"],
+      "summary": "Uko kwihagararaho mu isengesho bigira imbaraga iyo amategeko y'isi agukandamije.",
+      "seriesId": "ser_daniel",
+      "topicIds": ["top_prayer", "top_faith"],
+      "availability": { "hasAudio": true, "hasVideo": true, "hasTranscript": true },
+      "mediaAssets": [
+        {
+          "id": "med_dan_06_aud",
+          "kind": "audio",
+          "url": "https://cdn.example.org/senga/library/daniel-06.mp3",
+          "mimeType": "audio/mpeg",
+          "byteSize": 42100411
+        },
+        {
+          "id": "med_dan_06_vid",
+          "kind": "video",
+          "url": "https://cdn.example.org/senga/library/daniel-06.mp4",
+          "mimeType": "video/mp4",
+          "byteSize": 210900311
+        }
+      ],
+      "notes": {
+        "transcript": "Iyo isi ikwita ku ruhande, ijambo ry’Imana rikugira umutima mushya... (inyandiko ndende irakomeza)\n\n1) Menya aho uhagaze.\n2) Senga nk’uko wabigenzaga mbere.\n3) Ntugire isoni zo kugaragara uri mu isengesho."
+      },
+      "translations": {
+        "en": {
+          "title": "Daniel 6: Prayer under pressure",
+          "summary": "How steadfast prayer gains strength when the world’s rules press on you.",
+          "transcript": "When the world pushes you aside, God’s word renews the heart... (long text continues)\n\n1) Know where you stand.\n2) Pray as you used to.\n3) Don’t be ashamed to be seen praying."
+        },
+        "fr": {
+          "title": "Daniel 6 : La prière sous pression",
+          "summary": "Comment la prière persévérante devient forte quand les règles du monde te pressent.",
+          "transcript": "Quand le monde te met de côté, la Parole de Dieu renouvelle le cœur... (le texte continue)\n\n1) Sache où tu te tiens.\n2) Prie comme tu le faisais auparavant.\n3) N’aie pas honte d’être vu en prière."
+        }
+      },
+      "actions": {
+        "canPlayAudio": true,
+        "canWatchVideo": true,
+        "canDownload": true,
+        "canShare": true,
+        "canSave": true,
+        "canAddToQueue": true,
+        "canMarkCompleted": true
+      },
+      "offline": { "downloadState": "notDownloaded" }
+    },
+    {
+      "id": "srm_dan_03",
+      "title": "Daniyeli 3: Kwemera mu muriro",
+      "publishedAt": "2026-02-10T18:30:00Z",
+      "durationSeconds": 3150,
+      "scriptureReferences": ["Daniel 3"],
+      "summary": "Kwizera nyakuri kuza iyo twanze kunamira ibigirwamana by’igihe.",
+      "seriesId": "ser_daniel",
+      "topicIds": ["top_faith", "top_spiritual_warfare"],
+      "availability": { "hasAudio": true, "hasVideo": false, "hasTranscript": false },
+      "mediaAssets": [
+        {
+          "id": "med_dan_03_aud",
+          "kind": "audio",
+          "url": "https://cdn.example.org/senga/library/daniel-03.mp3",
+          "mimeType": "audio/mpeg",
+          "byteSize": 38800123
+        }
+      ],
+      "notes": { "transcript": "" },
+      "translations": {
+        "en": { "title": "Daniel 3: Faith in the fire", "summary": "True faith shows when we refuse to bow to the idols of our time.", "transcript": "" },
+        "fr": { "title": "Daniel 3 : La foi dans le feu", "summary": "La vraie foi se révèle quand nous refusons de nous prosterner devant les idoles de notre époque.", "transcript": "" }
+      },
+      "actions": {
+        "canPlayAudio": true,
+        "canWatchVideo": false,
+        "canDownload": true,
+        "canShare": true,
+        "canSave": true,
+        "canAddToQueue": true,
+        "canMarkCompleted": true
+      },
+      "offline": { "downloadState": "downloaded", "downloadId": "dl_dan_03_aud" }
+    },
+    {
+      "id": "srm_fam_01",
+      "title": "Kumva no kumvikanisha mu rugo",
+      "publishedAt": "2026-01-28T19:00:00Z",
+      "durationSeconds": 2460,
+      "scriptureReferences": ["Ephesians 4:29"],
+      "summary": "Ijambo rivuga rishyira hanze ibiri mu mutima—wige kuvuga wubaka, si uvunagura.",
+      "seriesId": "ser_family",
+      "topicIds": ["top_family"],
+      "availability": { "hasAudio": true, "hasVideo": true, "hasTranscript": false },
+      "mediaAssets": [
+        {
+          "id": "med_fam_01_aud",
+          "kind": "audio",
+          "url": "https://cdn.example.org/senga/library/family-01.mp3",
+          "mimeType": "audio/mpeg",
+          "byteSize": 32200555
+        },
+        {
+          "id": "med_fam_01_vid",
+          "kind": "video",
+          "url": "https://cdn.example.org/senga/library/family-01.mp4",
+          "mimeType": "video/mp4",
+          "byteSize": 180004321
+        }
+      ],
+      "notes": { "transcript": "" },
+      "translations": {
+        "en": { "title": "Understanding and being understood at home", "summary": "Words reveal the heart—learn to speak to build, not to break.", "transcript": "" },
+        "fr": { "title": "Se comprendre au foyer", "summary": "Les paroles révèlent le cœur—apprends à parler pour construire, pas pour détruire.", "transcript": "" }
+      },
+      "actions": {
+        "canPlayAudio": true,
+        "canWatchVideo": true,
+        "canDownload": true,
+        "canShare": true,
+        "canSave": true,
+        "canAddToQueue": true,
+        "canMarkCompleted": true
+      },
+      "offline": { "downloadState": "notDownloaded" }
+    },
+    {
+      "id": "srm_pray_04",
+      "title": "Isengesho ryo mu rugendo (iminota 12)",
+      "publishedAt": "2026-02-16T06:40:00Z",
+      "durationSeconds": 720,
+      "scriptureReferences": ["1 Thessalonians 5:17"],
+      "summary": "Uko wubaka isengesho ryoroshye kandi rikomeza mu buzima bwa buri munsi.",
+      "seriesId": "ser_prayer",
+      "topicIds": ["top_prayer"],
+      "availability": { "hasAudio": true, "hasVideo": false, "hasTranscript": true },
+      "mediaAssets": [
+        {
+          "id": "med_pray_04_aud",
+          "kind": "audio",
+          "url": "https://cdn.example.org/senga/library/prayer-04.mp3",
+          "mimeType": "audio/mpeg",
+          "byteSize": 9800123
+        }
+      ],
+      "notes": {
+        "transcript": "Senga mu magambo make. Tangira no guhumeka, uceceke, ushimire, hanyuma usabe...\n\nIcy'ingenzi si uburebure, ni ukwizera no gukomeza."
+      },
+      "translations": {
+        "en": {
+          "title": "Prayer on the way (12 minutes)",
+          "summary": "How to build a simple prayer rhythm that holds through everyday life.",
+          "transcript": "Pray with few words. Begin by breathing, be still, give thanks, then ask...\n\nWhat matters isn’t length—it’s faithfulness."
+        },
+        "fr": {
+          "title": "La prière en chemin (12 minutes)",
+          "summary": "Comment bâtir une prière simple qui tient dans la vie quotidienne.",
+          "transcript": "Prie avec peu de mots. Commence par respirer, reste calme, remercie, puis demande...\n\nL’important n’est pas la longueur—c’est la fidélité."
+        }
+      },
+      "actions": {
+        "canPlayAudio": true,
+        "canWatchVideo": false,
+        "canDownload": true,
+        "canShare": true,
+        "canSave": true,
+        "canAddToQueue": true,
+        "canMarkCompleted": true
+      },
+      "offline": { "downloadState": "notDownloaded", "isRecommendedForDownload": true }
+    },
+    {
+      "id": "srm_rep_02",
+      "title": "Kwihana 2: Gusaba imbabazi no gusubiza aho byapfiriye",
+      "publishedAt": "2025-12-10T20:10:00Z",
+      "durationSeconds": 2700,
+      "scriptureReferences": ["Luke 19:8"],
+      "summary": "Kwihana si amarangamutima gusa—ni guhindura icyerekezo no gusana aho twangije.",
+      "seriesId": "ser_repentance_path",
+      "topicIds": ["top_repentance", "top_faith"],
+      "availability": { "hasAudio": true, "hasVideo": false, "hasTranscript": false },
+      "mediaAssets": [
+        {
+          "id": "med_rep_02_aud",
+          "kind": "audio",
+          "url": "https://cdn.example.org/senga/library/repentance-02.mp3",
+          "mimeType": "audio/mpeg",
+          "byteSize": 35004567
+        }
+      ],
+      "notes": { "transcript": "" },
+      "translations": {
+        "en": { "title": "Repentance 2: Asking forgiveness and making things right", "summary": "Repentance is not only emotion—it’s changing direction and repairing what we harmed.", "transcript": "" },
+        "fr": { "title": "Repentance 2 : Demander pardon et réparer", "summary": "La repentance n’est pas seulement une émotion—c’est changer de direction et réparer ce que nous avons brisé.", "transcript": "" }
+      },
+      "actions": {
+        "canPlayAudio": true,
+        "canWatchVideo": false,
+        "canDownload": true,
+        "canShare": true,
+        "canSave": true,
+        "canAddToQueue": true,
+        "canMarkCompleted": true
+      },
+      "offline": { "downloadState": "notDownloaded" }
+    },
+    {
+      "id": "srm_misc_01",
+      "title": "Ijambo ryo kubaka umutima (gusoma gusa)",
+      "publishedAt": "2026-02-05T07:15:00Z",
+      "durationSeconds": 0,
+      "scriptureReferences": ["Psalm 23:1"],
+      "summary": "Igihe ugenda mu mwijima, ijambo ritanga ihumure—fata umwanya wo gusoma no gutekereza.",
+      "seriesId": null,
+      "topicIds": ["top_faith"],
+      "availability": { "hasAudio": false, "hasVideo": false, "hasTranscript": true },
+      "mediaAssets": [],
+      "notes": {
+        "transcript": "Uwiteka ni umwungeri wanjye; sinzabura ikintu na kimwe.\n\n- Tekereza ku byo Imana yakubereye.\n- Andika ikintu kimwe ushobora gushimira uyu munsi."
+      },
+      "translations": {
+        "en": {
+          "title": "A word to strengthen the heart (read-only)",
+          "summary": "When you walk through darkness, the Word comforts—take a moment to read and reflect.",
+          "transcript": "The Lord is my shepherd; I shall not want.\n\n- Reflect on what God has been for you.\n- Write one thing you can thank God for today."
+        },
+        "fr": {
+          "title": "Une parole pour fortifier le cœur (lecture)",
+          "summary": "Quand tu traverses l’obscurité, la Parole réconforte—prends un moment pour lire et réfléchir.",
+          "transcript": "L’Éternel est mon berger : je ne manquerai de rien.\n\n- Réfléchis à ce que Dieu a été pour toi.\n- Écris une chose pour laquelle tu peux remercier Dieu aujourd’hui."
+        }
+      },
+      "actions": {
+        "canPlayAudio": false,
+        "canWatchVideo": false,
+        "canDownload": false,
+        "canShare": true,
+        "canSave": true,
+        "canAddToQueue": false,
+        "canMarkCompleted": true
+      },
+      "offline": { "downloadState": "notApplicable" }
+    }
+  ],
+  "saved": {
+    "savedSermonIds": ["srm_dan_03", "srm_pray_04"],
+    "savedSeriesIds": ["ser_daniel"]
+  },
+  "listeningQueue": {
+    "queueSermonIds": ["srm_pray_04", "srm_dan_06", "srm_fam_01"]
+  },
+  "downloads": [
+    {
+      "id": "dl_dan_03_aud",
+      "mediaAssetId": "med_dan_03_aud",
+      "createdAt": "2026-02-11T06:20:00Z",
+      "byteSize": 38800123,
+      "state": "downloaded"
+    }
+  ],
+  "searchState": {
+    "query": "Daniyeli 6",
+    "filters": {
+      "seriesId": "ser_daniel",
+      "topicId": null,
+      "hasAudio": true,
+      "hasVideo": null,
+      "hasTranscript": null
+    },
+    "recentQueries": ["Isengesho", "Umuryango", "Kwihana", "Daniel 3"],
+    "resultSermonIds": ["srm_dan_06"]
+  }
+}

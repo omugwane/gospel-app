@@ -1,0 +1,260 @@
+{
+  "_meta": {
+    "models": {
+      "impactFund": "A ministry giving destination with vision, progress, and suggested contribution focus.",
+      "givingWizardState": "The current in-progress selection for amount, category, payment method, and donor preferences.",
+      "paymentMethod": "A supported giving channel for local or global donors.",
+      "savedPaymentMethod": "A tokenized payment option available for one-click giving on future transactions.",
+      "donationRecord": "A completed or processing gift transaction shown in personal giving history.",
+      "givingSummary": "Private aggregate totals and counts for the donor's yearly contribution history.",
+      "thankYouContent": "Post-payment gratitude assets such as a short prayer video and blessing message."
+    },
+    "relationships": [
+      "A donationRecord belongs to one impactFund and uses one paymentMethod.",
+      "A givingWizardState selects one impactFund and one paymentMethod before submit.",
+      "A user may have many donationRecord items and many savedPaymentMethod items.",
+      "givingSummary is derived from donationRecord entries for a selected year.",
+      "thankYouContent is shown after a successful donationRecord."
+    ]
+  },
+  "gatewayProvider": "Flutterwave",
+  "securityBadgeText": "Secured by Flutterwave • HTTPS Encrypted",
+  "heartOfGivingVideo": {
+    "title": "The Heart of Partnership",
+    "durationSeconds": 60,
+    "thumbnailUrl": "/media/giving/heart-of-giving-thumbnail.jpg",
+    "videoUrl": "/media/giving/heart-of-giving.mp4",
+    "message": "A short invitation from Pastor Senga to partner through generosity."
+  },
+  "impactFunds": [
+    {
+      "id": "fund-prophetic-mission",
+      "title": "Prophetic Mission Fund",
+      "description": "Supports outreach logistics, crusade preparation, worship equipment, and follow-up discipleship resources for large gatherings.",
+      "goalAmount": 25000000,
+      "raisedAmount": 17350000,
+      "currency": "RWF"
+    },
+    {
+      "id": "fund-family-media",
+      "title": "Family Connection Media",
+      "description": "Funds recording, editing, and distribution of marriage and family teachings for households in Rwanda and the diaspora.",
+      "goalAmount": 12000000,
+      "raisedAmount": 6850000,
+      "currency": "RWF"
+    },
+    {
+      "id": "fund-general-offering",
+      "title": "General Tithe & Offering",
+      "description": "Covers ongoing ministry operations including prayer support, daily media publishing, venue costs, and pastoral care for growing fellowship groups across regions. This category exists so faithful giving can continue even when a donor is not giving toward a campaign, and it ensures stability during months when project fundraising is lower than expected.",
+      "goalAmount": 18000000,
+      "raisedAmount": 10900000,
+      "currency": "RWF"
+    }
+  ],
+  "paymentMethods": [
+    {
+      "id": "mtn-momo",
+      "label": "MTN MoMo",
+      "type": "mobile_money",
+      "region": "Rwanda/Africa",
+      "isEnabled": true
+    },
+    {
+      "id": "airtel-money",
+      "label": "Airtel Money",
+      "type": "mobile_money",
+      "region": "Rwanda/Africa",
+      "isEnabled": true
+    },
+    {
+      "id": "visa-mastercard",
+      "label": "Visa / Mastercard",
+      "type": "card",
+      "region": "Global",
+      "isEnabled": true
+    },
+    {
+      "id": "apple-pay",
+      "label": "Apple Pay",
+      "type": "wallet",
+      "region": "Global",
+      "isEnabled": true
+    },
+    {
+      "id": "google-pay",
+      "label": "Google Pay",
+      "type": "wallet",
+      "region": "Global",
+      "isEnabled": true
+    }
+  ],
+  "currencyOptions": [
+    "RWF",
+    "USD",
+    "EUR",
+    "CAD"
+  ],
+  "presetAmountsByCurrency": {
+    "RWF": [
+      5000,
+      20000,
+      50000,
+      100000
+    ],
+    "USD": [
+      5,
+      20,
+      50,
+      100
+    ],
+    "EUR": [
+      5,
+      20,
+      50
+    ],
+    "CAD": [
+      10,
+      25,
+      50
+    ]
+  },
+  "givingWizardState": {
+    "step": "amount",
+    "currency": "RWF",
+    "amount": 20000,
+    "categoryId": "fund-general-offering",
+    "frequency": "one_time",
+    "isAnonymous": false,
+    "selectedPaymentMethodId": "mtn-momo",
+    "savePaymentMethod": true
+  },
+  "savedPaymentMethods": [
+    {
+      "id": "spm-001",
+      "label": "MTN MoMo •••• 4182",
+      "methodType": "mobile_money",
+      "provider": "Flutterwave",
+      "isDefault": true
+    },
+    {
+      "id": "spm-002",
+      "label": "Visa •••• 1024",
+      "methodType": "card",
+      "provider": "Flutterwave",
+      "isDefault": false
+    }
+  ],
+  "availableRecurringIntervals": [
+    "monthly"
+  ],
+  "donationHistory": [
+    {
+      "id": "don-001",
+      "date": "2026-02-28T08:15:00Z",
+      "fundId": "fund-general-offering",
+      "fundTitle": "General Tithe & Offering",
+      "amount": 50000,
+      "currency": "RWF",
+      "frequency": "one_time",
+      "paymentMethodLabel": "MTN MoMo",
+      "status": "succeeded",
+      "isAnonymous": false,
+      "receiptNumber": "SE-2026-00031"
+    },
+    {
+      "id": "don-002",
+      "date": "2026-02-11T18:20:00Z",
+      "fundId": "fund-family-media",
+      "fundTitle": "Family Connection Media",
+      "amount": 25,
+      "currency": "USD",
+      "frequency": "monthly",
+      "paymentMethodLabel": "Visa / Mastercard",
+      "status": "succeeded",
+      "isAnonymous": true,
+      "receiptNumber": "SE-2026-00022"
+    },
+    {
+      "id": "don-003",
+      "date": "2026-01-30T07:45:00Z",
+      "fundId": "fund-prophetic-mission",
+      "fundTitle": "Prophetic Mission Fund",
+      "amount": 100000,
+      "currency": "RWF",
+      "frequency": "one_time",
+      "paymentMethodLabel": "Airtel Money",
+      "status": "succeeded",
+      "isAnonymous": false,
+      "receiptNumber": "SE-2026-00017"
+    },
+    {
+      "id": "don-004",
+      "date": "2026-01-14T11:05:00Z",
+      "fundId": "fund-general-offering",
+      "fundTitle": "General Tithe & Offering",
+      "amount": 50,
+      "currency": "CAD",
+      "frequency": "monthly",
+      "paymentMethodLabel": "Google Pay",
+      "status": "processing",
+      "isAnonymous": false,
+      "receiptNumber": "SE-2026-00011"
+    },
+    {
+      "id": "don-005",
+      "date": "2025-12-29T16:40:00Z",
+      "fundId": "fund-family-media",
+      "fundTitle": "Family Connection Media",
+      "amount": 20,
+      "currency": "EUR",
+      "frequency": "one_time",
+      "paymentMethodLabel": "Apple Pay",
+      "status": "succeeded",
+      "isAnonymous": false,
+      "receiptNumber": "SE-2025-00189"
+    },
+    {
+      "id": "don-006",
+      "date": "2025-12-12T09:55:00Z",
+      "fundId": "fund-prophetic-mission",
+      "fundTitle": "Prophetic Mission Fund",
+      "amount": 5000,
+      "currency": "RWF",
+      "frequency": "one_time",
+      "paymentMethodLabel": "MTN MoMo",
+      "status": "failed",
+      "isAnonymous": true,
+      "receiptNumber": "SE-2025-00170"
+    },
+    {
+      "id": "don-007",
+      "date": "2025-11-30T21:10:00Z",
+      "fundId": "fund-general-offering",
+      "fundTitle": "General Tithe & Offering",
+      "amount": 20000,
+      "currency": "RWF",
+      "frequency": "monthly",
+      "paymentMethodLabel": "MTN MoMo",
+      "status": "succeeded",
+      "isAnonymous": false,
+      "receiptNumber": "SE-2025-00139"
+    }
+  ],
+  "givingSummary": {
+    "selectedYear": 2026,
+    "yearlyTotal": {
+      "currency": "RWF",
+      "amount": 230000
+    },
+    "successfulDonationsCount": 5,
+    "recurringDonationsCount": 3
+  },
+  "thankYouContent": {
+    "title": "Murakoze for partnering",
+    "message": "Pastor Senga prays a blessing over your household and seed.",
+    "videoUrl": "/media/giving/thank-you-prayer.mp4",
+    "durationSeconds": 35
+  },
+  "recentReceiptDownloads": []
+}
