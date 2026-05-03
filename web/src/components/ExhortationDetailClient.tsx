@@ -8,7 +8,7 @@ function pickVerseText(
   translations: Record<LanguageCode, { text: string }>,
   locale: LanguageCode
 ): string {
-  const order: LanguageCode[] = [locale, 'rw', 'en', 'fr']
+  const order: LanguageCode[] = [locale, 'en', 'fr', 'rw']
   for (const code of order) {
     const text = translations[code]?.text?.trim()
     if (text) return text

@@ -23,6 +23,7 @@ export interface Series {
   description: string
   sermonCount: number
   topicIds: string[]
+  thumbnailUrl?: string
   translations?: Partial<Record<LanguageCode, { title: string; description: string }>>
 }
 
@@ -42,6 +43,18 @@ export interface SermonAvailability {
   hasTranscript: boolean
 }
 
+export type SermonVideo =
+  | {
+      provider: 'youtube'
+      videoId: string
+      watchUrl: string
+      embedUrl: string
+    }
+  | {
+      provider: 'mux'
+      playbackId: string
+    }
+
 export type DownloadState =
   | 'notDownloaded'
   | 'downloading'
@@ -51,6 +64,7 @@ export type DownloadState =
 
 export interface Sermon {
   id: string
+  episodeNumber?: number | null
   title: string
   publishedAt: string
   durationSeconds: number
@@ -58,6 +72,8 @@ export interface Sermon {
   summary: string
   seriesId: string | null
   topicIds: string[]
+  thumbnailUrl?: string
+  video?: SermonVideo
   availability: SermonAvailability
   mediaAssets: MediaAsset[]
   notes: {
@@ -154,6 +170,19 @@ export interface LibraryTranslations {
   unknownSermon?: string
   downloadsTitle?: string
   removeDownload?: string
+  /** Shown when every loaded sermon in the series is marked complete. */
+  seriesCompletedBadge?: string
+  /**
+   * Count line for partial progress. Placeholders: `{{completed}}`, `{{total}}`.
+   * Example: "{{completed}} of {{total}} completed"
+   */
+  seriesProgressCount?: string
+  /**
+   * Accessible description for in-progress series. Placeholders: `{{completed}}`, `{{total}}`, `{{percent}}`.
+   */
+  seriesProgressAria?: string
+  /** Accessible label when the series is fully complete. */
+  seriesProgressCompleteAria?: string
 }
 
 export const DEFAULT_LIBRARY_TRANSLATIONS: LibraryTranslations = {
@@ -189,6 +218,10 @@ export const DEFAULT_LIBRARY_TRANSLATIONS: LibraryTranslations = {
   unknownSermon: 'Unknown sermon',
   downloadsTitle: 'Downloads',
   removeDownload: 'Remove',
+  seriesCompletedBadge: 'Completed',
+  seriesProgressCount: '{{completed}} of {{total}} completed',
+  seriesProgressAria: '{{completed}} of {{total}} sermons completed, {{percent}} percent',
+  seriesProgressCompleteAria: 'Series completed',
 }
 
 export interface LibraryData {
@@ -201,6 +234,25 @@ export interface LibraryData {
   listeningQueue: ListeningQueueState
   downloads: Download[]
   searchState: SearchState
+  /** Sermons the signed-in viewer has marked as listened/finished. */
+  completedSermonIds: string[]
+}
+
+/** Result of async library actions (save, queue, download, completion, share). */
+export type LibraryActionFailureReason =
+  | 'auth_required'
+  | 'firebase_unconfigured'
+  | 'missing_asset'
+  | 'unknown'
+
+export interface LibraryActionResult {
+  ok: boolean
+  /** When false, narrowed reason for callers that branch on failures. */
+  reason?: LibraryActionFailureReason
+  /** User-visible detail (error or success confirmation). */
+  message?: string
+  /** True when the action was a benign no-op (e.g. already in queue). */
+  skipped?: boolean
 }
 
 export interface LibraryProps {
@@ -236,7 +288,7 @@ export interface LibraryProps {
   /**
    * Fired when the user downloads a sermon for offline listening.
    */
-  onDownloadSermon?: (sermonId: string) => void
+  onDownloadSermon?: (sermonId: string) => void | Promise<LibraryActionResult>
   /**
    * Fired when the user removes a previously downloaded sermon.
    */
@@ -244,11 +296,11 @@ export interface LibraryProps {
   /**
    * Fired when the user shares a sermon.
    */
-  onShareSermon?: (sermonId: string) => void
+  onShareSermon?: (sermonId: string) => void | Promise<LibraryActionResult>
   /**
    * Fired when the user toggles a sermon bookmark/save.
    */
-  onToggleSaveSermon?: (sermonId: string, saved: boolean) => void
+  onToggleSaveSermon?: (sermonId: string, saved: boolean) => void | Promise<LibraryActionResult>
   /**
    * Fired when the user toggles saving a series.
    */
@@ -256,11 +308,11 @@ export interface LibraryProps {
   /**
    * Fired when the user adds a sermon to the listening queue.
    */
-  onAddToQueue?: (sermonId: string) => void
+  onAddToQueue?: (sermonId: string) => void | Promise<LibraryActionResult>
   /**
    * Fired when the user marks a sermon completed/listened.
    */
-  onMarkSermonCompleted?: (sermonId: string, completed: boolean) => void
+  onMarkSermonCompleted?: (sermonId: string, completed: boolean) => void | Promise<LibraryActionResult>
   /**
    * Fired when the user updates the search query.
    */
@@ -277,5 +329,9 @@ export interface LibraryProps {
    * Fired when the user opens the downloads/offline view.
    */
   onOpenDownloads?: () => void
+  /**
+   * Fired when the user opens their saved sermons view.
+   */
+  onOpenSavedSermons?: () => void
 }
 

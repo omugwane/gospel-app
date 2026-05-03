@@ -1,0 +1,12 @@
+{
+  "name": "gospel-app",
+  "private": true,
+  "scripts": {
+    "firebase:deploy-rules": "node ./scripts/firebase-deploy-rules.mjs",
+    "firebase:deploy-rules:cli": "firebase deploy --only firestore:rules",
+    "firebase:deploy-firestore": "firebase deploy --only firestore"
+  },
+  "devDependencies": {
+    "firebase-tools": "^14.26.0"
+  }
+}

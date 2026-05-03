@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation'
 import ShellLayout from '@/components/ShellLayout'
 import PlanDayViewClient from '@/components/PlanDayViewClient'
 import { getPlansData } from '@/lib/mappers/plans'
@@ -17,13 +18,7 @@ export default async function PlanDayPage({
   const initialDay = day ? parseInt(day, 10) : undefined
 
   if (!plan) {
-    return (
-      <ShellLayout>
-        <div className="mx-auto max-w-5xl px-4 py-8">
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">Plan not found.</p>
-        </div>
-      </ShellLayout>
-    )
+    notFound()
   }
 
   return (

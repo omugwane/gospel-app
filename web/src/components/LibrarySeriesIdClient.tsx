@@ -1,36 +1,30 @@
 'use client'
 
-import type { LanguageCode, LibraryData, SearchFilters } from '@/product/sections/library/types'
+import type { LibraryData, SearchFilters } from '@/product/sections/library/types'
 import { SermonList } from '@/product/sections/library/components'
 import { useLibraryCallbacks } from '@/lib/library-callbacks'
+import { useMergedLibraryData } from '@/lib/library-overlay'
 
 export default function LibrarySeriesIdClient({
   data,
   seriesId,
-  locale,
 }: {
   data: LibraryData
   seriesId: string
-  locale: LanguageCode
 }) {
-  const callbacks = useLibraryCallbacks(data)
+  const { data: mergedData, locale } = useMergedLibraryData(data)
+  const callbacks = useLibraryCallbacks(mergedData)
 
-  const mergedData: LibraryData = {
-    ...data,
+  const scopedData: LibraryData = {
+    ...mergedData,
     searchState: {
-      ...data.searchState,
+      ...mergedData.searchState,
       filters: {
-        ...data.searchState.filters,
+        ...mergedData.searchState.filters,
         seriesId,
       } as SearchFilters,
     },
   }
 
-  return (
-    <SermonList
-      data={mergedData}
-      locale={locale}
-      {...callbacks}
-    />
-  )
+  return <SermonList data={scopedData} locale={locale} {...callbacks} />
 }

@@ -1,6 +1,8 @@
 'use client'
 
 import * as AvatarPrimitive from '@radix-ui/react-avatar'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/components/auth-context'
 import { usePreferences } from '@/components/preferences-context'
 
 function initials(name: string) {
@@ -11,9 +13,19 @@ function initials(name: string) {
 }
 
 export default function AccountPreferencesClient() {
+  const router = useRouter()
   const { user, language, theme, setLanguage, setTheme, languageOptions } = usePreferences()
+  const { status, error, signOutUser, clearError } = useAuth()
   const displayName = user?.name?.trim() || 'Guest'
   const fallback = initials(displayName)
+
+  const handleSignOut = async () => {
+    try {
+      await signOutUser()
+    } finally {
+      router.replace('/login')
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -77,6 +89,39 @@ export default function AccountPreferencesClient() {
               {option}
             </button>
           ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-card-border bg-card-bg p-5">
+        <h2 className="text-sm font-semibold text-heading">Session</h2>
+        <p className="mt-1 text-xs text-muted">
+          Sign out of this device. You will need your Google account to sign back in.
+        </p>
+
+        {error ? (
+          <div className="mt-3 rounded-xl border border-card-border bg-card-bg-solid px-3 py-2">
+            <p className="text-xs text-muted">{error}</p>
+            <button
+              type="button"
+              onClick={clearError}
+              className="mt-2 rounded-xl border border-card-border bg-card-bg-solid px-3 py-2 text-sm font-semibold text-heading transition-colors"
+            >
+              Dismiss
+            </button>
+          </div>
+        ) : null}
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              void handleSignOut()
+            }}
+            disabled={status === 'loading'}
+            className="rounded-xl border border-card-border bg-card-bg-solid px-3 py-2 text-sm font-semibold text-heading transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {status === 'loading' ? 'Loading…' : 'Sign out'}
+          </button>
         </div>
       </section>
 

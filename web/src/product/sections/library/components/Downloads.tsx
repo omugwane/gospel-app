@@ -98,7 +98,13 @@ export function Downloads({
             <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
               <button
                 type="button"
-                onClick={() => onBack?.() ?? onOpenSeries?.(data.series?.[0]?.id ?? '')}
+                onClick={() => {
+                  if (onBack) {
+                    onBack()
+                    return
+                  }
+                  onOpenSeries?.(data.series?.[0]?.id ?? '')
+                }}
                 className="inline-flex items-center gap-1 rounded-full border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 px-3 py-1 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors"
               >
                 <ChevronLeft className="h-3.5 w-3.5" strokeWidth={1.75} />

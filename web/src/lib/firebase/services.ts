@@ -1,35 +1,121 @@
-/**
- * Firebase service layer.
- *
- * All Firestore reads/writes should go through functions exported
- * from this module (or domain-specific modules that import it).
- * This ensures that when offline persistence is enabled, the
- * cache behaviour applies uniformly.
- *
- * ---------------------------------------------------------------
- * OFFLINE PERSISTENCE (enable after Firebase SDK is installed):
- *
- *   import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore'
- *
- *   const db = getFirestore(app)
- *   enableIndexedDbPersistence(db).catch((err) => {
- *     if (err.code === 'failed-precondition') {
- *       // Multiple tabs open — persistence can only be enabled in one.
- *     } else if (err.code === 'unimplemented') {
- *       // Browser does not support IndexedDB persistence.
- *     }
- *   })
- *
- * ---------------------------------------------------------------
- * FCM PUSH NOTIFICATIONS (enable after service worker is set up):
- *
- *   import { getMessaging, getToken, onMessage } from 'firebase/messaging'
- *
- *   const messaging = getMessaging(app)
- *   const token = await getToken(messaging, { vapidKey: '...' })
- *   // Store token in Firestore under the user's devices collection
- *
- * ---------------------------------------------------------------
- */
+import type { User } from 'firebase/auth'
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  type DocumentReference,
+} from 'firebase/firestore'
+import type { UiLanguage, UiTheme } from '@/components/preferences-context'
+import { getFirebaseDb } from '@/lib/firebase/client'
+import { Collections } from '@/lib/firebase/collections'
 
-export {}
+export interface FirebaseUserProfile {
+  uid: string
+  email: string | null
+  displayName: string | null
+  photoURL: string | null
+  preferredLanguage?: UiLanguage
+  preferredTheme?: UiTheme
+}
+
+type UserProfileDocument = Omit<FirebaseUserProfile, 'uid'> & {
+  createdAt?: unknown
+  updatedAt?: unknown
+}
+
+function getUserProfileRef(uid: string): DocumentReference<UserProfileDocument> | null {
+  const db = getFirebaseDb()
+  if (!db) {
+    return null
+  }
+
+  return doc(db, Collections.users, uid) as DocumentReference<UserProfileDocument>
+}
+
+function isLanguage(value: unknown): value is UiLanguage {
+  return value === 'rw' || value === 'en' || value === 'fr'
+}
+
+function isTheme(value: unknown): value is UiTheme {
+  return value === 'light' || value === 'dark' || value === 'system'
+}
+
+function normalizeUserProfile(uid: string, value: unknown): FirebaseUserProfile | null {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  const record = value as Record<string, unknown>
+
+  return {
+    uid,
+    email: typeof record.email === 'string' ? record.email : null,
+    displayName: typeof record.displayName === 'string' ? record.displayName : null,
+    photoURL: typeof record.photoURL === 'string' ? record.photoURL : null,
+    preferredLanguage: isLanguage(record.preferredLanguage) ? record.preferredLanguage : undefined,
+    preferredTheme: isTheme(record.preferredTheme) ? record.preferredTheme : undefined,
+  }
+}
+
+export async function ensureFirebaseUserProfile(user: User): Promise<FirebaseUserProfile | null> {
+  const ref = getUserProfileRef(user.uid)
+  if (!ref) {
+    return null
+  }
+
+  const baseProfile: UserProfileDocument = {
+    email: user.email ?? null,
+    displayName: user.displayName ?? null,
+    photoURL: user.photoURL ?? null,
+  }
+
+  await setDoc(
+    ref,
+    {
+      ...baseProfile,
+      updatedAt: serverTimestamp(),
+      createdAt: serverTimestamp(),
+    },
+    { merge: true }
+  )
+
+  const snapshot = await getDoc(ref)
+  return normalizeUserProfile(user.uid, snapshot.data()) ?? { uid: user.uid, ...baseProfile }
+}
+
+export async function getFirebaseUserProfile(uid: string): Promise<FirebaseUserProfile | null> {
+  const ref = getUserProfileRef(uid)
+  if (!ref) {
+    return null
+  }
+
+  const snapshot = await getDoc(ref)
+  if (!snapshot.exists()) {
+    return null
+  }
+
+  return normalizeUserProfile(uid, snapshot.data())
+}
+
+export async function updateFirebaseUserPreferences(
+  uid: string,
+  preferences: {
+    preferredLanguage?: UiLanguage
+    preferredTheme?: UiTheme
+  }
+): Promise<void> {
+  const ref = getUserProfileRef(uid)
+  if (!ref) {
+    return
+  }
+
+  await setDoc(
+    ref,
+    {
+      ...preferences,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  )
+}

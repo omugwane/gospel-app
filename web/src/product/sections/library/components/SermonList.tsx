@@ -16,6 +16,7 @@ import {
   Video,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { computeSeriesProgress } from '@/lib/library-series-progress'
 import type {
   LanguageCode,
   LibraryProps,
@@ -23,6 +24,8 @@ import type {
   Sermon,
   Series,
 } from '@/product/sections/library/types'
+import { DEFAULT_LIBRARY_TRANSLATIONS } from '@/product/sections/library/types'
+import { SeriesProgressStrip } from '@/product/sections/library/components/SeriesProgressStrip'
 function formatDuration(totalSeconds: number) {
   if (!totalSeconds || totalSeconds <= 0) return '—'
   const m = Math.floor(totalSeconds / 60)
@@ -67,6 +70,38 @@ function pickSermonText(sermon: Sermon, locale: LanguageCode) {
     title: t?.title?.trim() || sermon.title,
     summary: t?.summary?.trim() || sermon.summary,
   }
+}
+
+function SermonThumbnail({
+  src,
+  title,
+  className,
+}: {
+  src?: string
+  title: string
+  className?: string
+}) {
+  return (
+    <div
+      className={cn(
+        'relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary-50 via-neutral-100 to-primary-50 dark:from-secondary-950/40 dark:via-neutral-900 dark:to-primary-950/40',
+        className
+      )}
+    >
+      {src ? (
+        <img src={src} alt="" className="h-full w-full object-cover" />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Headphones className="h-9 w-9 text-neutral-300 dark:text-neutral-600" strokeWidth={1.4} />
+        </div>
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+      <div className="absolute bottom-2 right-2 rounded-full bg-white/85 px-2 py-1 text-[10px] font-semibold text-neutral-700 shadow-sm dark:bg-neutral-950/80 dark:text-neutral-200">
+        Sermon
+      </div>
+      <span className="sr-only">{title}</span>
+    </div>
+  )
 }
 
 function AvailabilityBadge({ tone, children }: { tone: 'primary' | 'secondary' | 'neutral'; children: React.ReactNode }) {
@@ -118,6 +153,7 @@ function SermonCard({
   locale,
   isSaved,
   isInQueue,
+  isCompleted,
   onOpen,
   onPlay,
   onWatch,
@@ -132,6 +168,7 @@ function SermonCard({
   locale: LanguageCode
   isSaved: boolean
   isInQueue: boolean
+  isCompleted: boolean
   onOpen?: () => void
   onPlay?: () => void
   onWatch?: () => void
@@ -144,76 +181,83 @@ function SermonCard({
   const downloaded = sermon.offline.downloadState === 'downloaded'
   return (
     <div className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-white/80 dark:hover:bg-neutral-950/60 transition-colors p-5">
-      <div className="flex items-start justify-between gap-3">
-        <button type="button" onClick={onOpen} className="min-w-0 text-left">
-          <div className="flex flex-wrap items-center gap-2">
-            {downloaded ? (
-              <AvailabilityBadge tone="secondary">
-                <Download className="h-3 w-3" strokeWidth={2} />
-                Offline
-              </AvailabilityBadge>
-            ) : null}
-            {isInQueue ? (
-              <AvailabilityBadge tone="neutral">
-                <ListMusic className="h-3 w-3" strokeWidth={2} />
-                In queue
-              </AvailabilityBadge>
-            ) : null}
-            {sermon.availability.hasAudio ? (
-              <AvailabilityBadge tone="primary">
-                <Headphones className="h-3 w-3" strokeWidth={2} />
-                Audio
-              </AvailabilityBadge>
-            ) : null}
-            {sermon.availability.hasVideo ? (
-              <AvailabilityBadge tone="secondary">
-                <Video className="h-3 w-3" strokeWidth={2} />
-                Video
-              </AvailabilityBadge>
-            ) : null}
-            {sermon.availability.hasTranscript ? (
-              <AvailabilityBadge tone="neutral">
-                <Tag className="h-3 w-3" strokeWidth={2} />
-                Notes
-              </AvailabilityBadge>
-            ) : null}
-          </div>
-
-          <div className="mt-2 text-sm font-semibold text-neutral-950 dark:text-neutral-50 line-clamp-2">
-            {text.title}
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
-            <span>{formatDate(sermon.publishedAt)}</span>
-            <span className="opacity-50">•</span>
-            <span>{formatDuration(sermon.durationSeconds)}</span>
-            {seriesTitle ? (
-              <>
-                <span className="opacity-50">•</span>
-                <span className="text-neutral-700 dark:text-neutral-300">{seriesTitle}</span>
-              </>
-            ) : null}
-          </div>
-          <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed line-clamp-2">
-            {text.summary}
-          </p>
+      <div className="flex items-start gap-4">
+        <button type="button" onClick={onOpen} className="shrink-0">
+          <SermonThumbnail src={sermon.thumbnailUrl} title={text.title} className="h-24 w-24 sm:h-28 sm:w-28" />
         </button>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <button type="button" onClick={onOpen} className="min-w-0 text-left">
+              <div className="flex flex-wrap items-center gap-2">
+                {downloaded ? (
+                  <AvailabilityBadge tone="secondary">
+                    <Download className="h-3 w-3" strokeWidth={2} />
+                    Offline
+                  </AvailabilityBadge>
+                ) : null}
+                {isInQueue ? (
+                  <AvailabilityBadge tone="neutral">
+                    <ListMusic className="h-3 w-3" strokeWidth={2} />
+                    In queue
+                  </AvailabilityBadge>
+                ) : null}
+                {sermon.availability.hasAudio ? (
+                  <AvailabilityBadge tone="primary">
+                    <Headphones className="h-3 w-3" strokeWidth={2} />
+                    Audio
+                  </AvailabilityBadge>
+                ) : null}
+                {sermon.availability.hasVideo ? (
+                  <AvailabilityBadge tone="secondary">
+                    <Video className="h-3 w-3" strokeWidth={2} />
+                    Video
+                  </AvailabilityBadge>
+                ) : null}
+                {sermon.availability.hasTranscript ? (
+                  <AvailabilityBadge tone="neutral">
+                    <Tag className="h-3 w-3" strokeWidth={2} />
+                    Notes
+                  </AvailabilityBadge>
+                ) : null}
+              </div>
 
-        <div className="shrink-0 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => onToggleSave?.(!isSaved)}
-            className={cn(
-              'h-10 w-10 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors flex items-center justify-center',
-              isSaved && 'border-primary-200 dark:border-primary-500/40 bg-primary-600/10 dark:bg-primary-400/10'
-            )}
-            aria-label={isSaved ? 'Unsave sermon' : 'Save sermon'}
-          >
-            {isSaved ? (
-              <BookmarkCheck className="h-4 w-4 text-primary-700 dark:text-primary-200" strokeWidth={1.75} />
-            ) : (
-              <Bookmark className="h-4 w-4 text-neutral-600 dark:text-neutral-300" strokeWidth={1.75} />
-            )}
-          </button>
+              <div className="mt-2 text-sm font-semibold text-neutral-950 dark:text-neutral-50 line-clamp-2">
+                {text.title}
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
+                <span>{formatDate(sermon.publishedAt)}</span>
+                <span className="opacity-50">•</span>
+                <span>{formatDuration(sermon.durationSeconds)}</span>
+                {seriesTitle ? (
+                  <>
+                    <span className="opacity-50">•</span>
+                    <span className="text-neutral-700 dark:text-neutral-300">{seriesTitle}</span>
+                  </>
+                ) : null}
+              </div>
+              <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed line-clamp-2">
+                {text.summary}
+              </p>
+            </button>
+
+            <div className="shrink-0 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onToggleSave?.(!isSaved)}
+                className={cn(
+                  'h-10 w-10 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors flex items-center justify-center',
+                  isSaved && 'border-primary-200 dark:border-primary-500/40 bg-primary-600/10 dark:bg-primary-400/10'
+                )}
+                aria-label={isSaved ? 'Unsave sermon' : 'Save sermon'}
+              >
+                {isSaved ? (
+                  <BookmarkCheck className="h-4 w-4 text-primary-700 dark:text-primary-200" strokeWidth={1.75} />
+                ) : (
+                  <Bookmark className="h-4 w-4 text-neutral-600 dark:text-neutral-300" strokeWidth={1.75} />
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -290,17 +334,19 @@ function SermonCard({
         </button>
         <button
           type="button"
-          onClick={() => onMarkCompleted?.(true)}
+          onClick={() => onMarkCompleted?.(!isCompleted)}
           disabled={!sermon.actions.canMarkCompleted}
           className={cn(
-            'ml-auto inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-colors border border-neutral-200 dark:border-neutral-800',
-            sermon.actions.canMarkCompleted
-              ? 'bg-white/60 dark:bg-neutral-950/40 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-900'
-              : 'bg-white/30 dark:bg-neutral-950/20 text-neutral-400 dark:text-neutral-500 border-neutral-200/40 dark:border-neutral-800/40'
+            'ml-auto inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-colors border',
+            isCompleted
+              ? 'bg-primary-600/10 text-primary-900 dark:bg-primary-400/10 dark:text-primary-100 border-primary-200/70 dark:border-primary-500/40 hover:bg-primary-600/15 dark:hover:bg-primary-400/15'
+              : sermon.actions.canMarkCompleted
+                ? 'bg-white/60 dark:bg-neutral-950/40 text-neutral-900 dark:text-neutral-100 border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-900'
+                : 'bg-white/30 dark:bg-neutral-950/20 text-neutral-400 dark:text-neutral-500 border-neutral-200/40 dark:border-neutral-800/40'
           )}
         >
           <CheckCircle2 className="h-4 w-4" strokeWidth={1.75} />
-          Completed
+          {isCompleted ? 'Completed' : 'Mark complete'}
         </button>
       </div>
     </div>
@@ -310,6 +356,7 @@ function SermonCard({
 export function SermonList({
   data,
   locale,
+  translations: translationsProp,
   onBack,
   onOpenSeries,
   onOpenSermon,
@@ -324,6 +371,11 @@ export function SermonList({
 }: LibraryProps) {
   const [query, setQuery] = useState(data.searchState.query)
   const [filters, setFilters] = useState<SearchFilters>(data.searchState.filters)
+
+  const t = useMemo(
+    () => ({ ...DEFAULT_LIBRARY_TRANSLATIONS, ...translationsProp }),
+    [translationsProp]
+  )
 
   const seriesById = useMemo(() => new Map(data.series.map((s) => [s.id, s])), [data.series])
   const topicById = useMemo(() => new Map(data.topics.map((t) => [t.id, t])), [data.topics])
@@ -345,6 +397,11 @@ export function SermonList({
       ? 'Filtered by topic'
       : 'Browse the archive'
 
+  const seriesProgress = useMemo(() => {
+    if (!filters.seriesId) return null
+    return computeSeriesProgress(filters.seriesId, data.sermons, data.completedSermonIds)
+  }, [filters.seriesId, data.sermons, data.completedSermonIds])
+
   const applyFilters = (next: SearchFilters) => {
     setFilters(next)
     onUpdateSearchFilters?.(next)
@@ -365,8 +422,8 @@ export function SermonList({
     if (filters.hasVideo !== null) list = list.filter((s) => s.availability.hasVideo === filters.hasVideo)
     if (filters.hasTranscript !== null) list = list.filter((s) => s.availability.hasTranscript === filters.hasTranscript)
 
-    if (!q) return list
-    return list.filter((s) => {
+    if (q) {
+      list = list.filter((s) => {
       const t = pickSermonText(s, locale)
       const transcript =
         locale !== 'rw'
@@ -375,7 +432,23 @@ export function SermonList({
 
       const hay = [t.title, t.summary, ...s.scriptureReferences, transcript].join(' ').toLowerCase()
       return hay.includes(q)
-    })
+      })
+    }
+
+    // For a specific series, sort by episodeNumber when available so sequence 1,2,3… is respected.
+    if (filters.seriesId) {
+      const sorted = [...list].sort((a, b) => {
+        const aEp = a.episodeNumber ?? Number.MAX_SAFE_INTEGER
+        const bEp = b.episodeNumber ?? Number.MAX_SAFE_INTEGER
+        if (aEp !== bEp) return aEp - bEp
+        const aDate = new Date(a.publishedAt).getTime()
+        const bDate = new Date(b.publishedAt).getTime()
+        return aDate - bDate
+      })
+      return sorted
+    }
+
+    return list
   }, [locale, data.sermons, filters, query])
 
   return (
@@ -387,7 +460,13 @@ export function SermonList({
             <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
               <button
                 type="button"
-                onClick={() => onBack?.() ?? onOpenSeries?.(data.series[0]?.id ?? '')}
+                onClick={() => {
+                  if (onBack) {
+                    onBack()
+                    return
+                  }
+                  onOpenSeries?.(data.series[0]?.id ?? '')
+                }}
                 className="inline-flex items-center gap-1 rounded-full border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 px-3 py-1 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors"
               >
                 <ChevronLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
@@ -404,6 +483,9 @@ export function SermonList({
               {headerTitle}
             </h1>
             <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2">{subtitle}</p>
+            {seriesProgress && seriesProgress.totalCount > 0 ? (
+              <SeriesProgressStrip progress={seriesProgress} t={t} className="mt-4 max-w-md" />
+            ) : null}
           </div>
 
           <div className="w-full md:max-w-md">
@@ -472,6 +554,16 @@ export function SermonList({
               <div className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
                 Try a different keyword or clear filters.
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerSearch('')
+                  applyFilters({ seriesId: null, topicId: null, hasAudio: null, hasVideo: null, hasTranscript: null })
+                }}
+                className="mt-3 rounded-lg px-3 py-1.5 text-xs font-semibold text-primary-700 dark:text-primary-200 border border-primary-200/70 dark:border-primary-500/30 hover:bg-primary-50 dark:hover:bg-primary-400/10 transition-colors"
+              >
+                Clear all filters
+              </button>
             </div>
           ) : (
             results.map((s) => {
@@ -493,6 +585,7 @@ export function SermonList({
                   locale={locale}
                   isSaved={data.saved.savedSermonIds.includes(s.id)}
                   isInQueue={queue.has(s.id)}
+                  isCompleted={data.completedSermonIds.includes(s.id)}
                   onOpen={() => onOpenSermon?.(s.id)}
                   onPlay={() => onPlaySermonAudio?.(s.id)}
                   onWatch={() => onWatchSermonVideo?.(s.id)}

@@ -5,4 +5,5 @@ export { SermonDetail } from './SermonDetail'
 export { SearchResults } from './SearchResults'
 export { SearchEmptyState } from './SearchEmptyState'
 export { Downloads } from './Downloads'
+export { SavedSermons } from './SavedSermons'
 

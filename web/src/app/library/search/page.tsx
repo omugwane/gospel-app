@@ -5,18 +5,27 @@ import { getLibraryData } from '@/lib/mappers/library'
 export default async function LibrarySearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; topic?: string }>
+  searchParams: Promise<{
+    q?: string
+    topic?: string
+    series?: string
+    audio?: string
+    video?: string
+    notes?: string
+  }>
 }) {
-  const { q, topic } = await searchParams
+  const { q, topic, series, audio, video, notes } = await searchParams
   const data = await getLibraryData()
-  const locale = (data.viewer.preferredLanguage ?? 'rw') as 'rw' | 'en' | 'fr'
   return (
     <ShellLayout>
       <LibrarySearchClient
         data={data}
         initialQuery={q}
-        initialTopicId={topic ?? undefined}
-        locale={locale}
+        initialTopicId={topic}
+        initialSeriesId={series}
+        initialHasAudio={audio === '1' ? true : undefined}
+        initialHasVideo={video === '1' ? true : undefined}
+        initialHasTranscript={notes === '1' ? true : undefined}
       />
     </ShellLayout>
   )

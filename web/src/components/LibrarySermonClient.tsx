@@ -1,25 +1,38 @@
 'use client'
 
-import type { LanguageCode, LibraryData } from '@/product/sections/library/types'
+import { useCallback } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import type { LibraryData } from '@/product/sections/library/types'
 import { SermonDetail } from '@/product/sections/library/components'
 import { useLibraryCallbacks } from '@/lib/library-callbacks'
+import { useMergedLibraryData } from '@/lib/library-overlay'
 
 export default function LibrarySermonClient({
   data,
   sermonId,
-  locale,
+  autoplayAudioOnMount = false,
 }: {
   data: LibraryData
   sermonId: string
-  locale: LanguageCode
+  autoplayAudioOnMount?: boolean
 }) {
-  const callbacks = useLibraryCallbacks(data)
+  const router = useRouter()
+  const pathname = usePathname()
+  const { data: mergedData, locale } = useMergedLibraryData(data)
+  const callbacks = useLibraryCallbacks(mergedData)
+
+  const onAutoplayIntentConsumed = useCallback(() => {
+    router.replace(pathname)
+  }, [router, pathname])
+
   return (
     <SermonDetail
-      data={data}
+      {...callbacks}
+      data={mergedData}
       sermonId={sermonId}
       locale={locale}
-      {...callbacks}
+      autoplayAudioOnMount={autoplayAudioOnMount}
+      onAutoplayIntentConsumed={autoplayAudioOnMount ? onAutoplayIntentConsumed : undefined}
     />
   )
 }

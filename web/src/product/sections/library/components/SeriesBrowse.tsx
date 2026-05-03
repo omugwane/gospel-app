@@ -2,6 +2,8 @@
 
 import { useMemo } from 'react'
 import { ArrowRight, Bookmark, BookmarkCheck, ChevronLeft, ListMusic, Sparkles, Tag } from 'lucide-react'
+import { buildSeriesProgressMap } from '@/lib/library-series-progress'
+import type { SeriesProgress } from '@/lib/library-series-progress'
 import { cn } from '@/lib/utils'
 import type {
   LibraryProps,
@@ -10,6 +12,7 @@ import type {
   Topic,
 } from '@/product/sections/library/types'
 import { DEFAULT_LIBRARY_TRANSLATIONS } from '@/product/sections/library/types'
+import { SeriesProgressStrip } from '@/product/sections/library/components/SeriesProgressStrip'
 
 function pickSeriesText(series: Series, locale: string) {
   if (locale === 'rw') return { title: series.title, description: series.description }
@@ -30,12 +33,44 @@ function pickLabel(
   return alt || base
 }
 
+function SeriesThumbnail({
+  src,
+  title,
+  className,
+}: {
+  src?: string
+  title: string
+  className?: string
+}) {
+  return (
+    <div
+      className={cn(
+        'relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-100 via-neutral-100 to-secondary-50 dark:from-primary-950/50 dark:via-neutral-900 dark:to-secondary-950/30',
+        className
+      )}
+    >
+      {src ? (
+        <img src={src} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <ListMusic className="h-10 w-10 text-neutral-300 dark:text-neutral-600" strokeWidth={1.4} />
+        </div>
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+      <div className="absolute bottom-3 left-3 right-3">
+        <div className="line-clamp-2 text-sm font-semibold text-white drop-shadow-sm">{title}</div>
+      </div>
+    </div>
+  )
+}
+
 function SeriesCard({
   series,
   topics,
   isSaved,
   locale,
   t,
+  progress,
   variant = 'default',
   onOpen,
   onToggleSave,
@@ -45,11 +80,13 @@ function SeriesCard({
   isSaved: boolean
   locale: string
   t: LibraryTranslations
+  progress: SeriesProgress
   variant?: 'default' | 'compact'
   onOpen?: () => void
   onToggleSave?: (nextSaved: boolean) => void
 }) {
   const seriesText = pickSeriesText(series, locale)
+  const sermonCountShown = progress.totalCount > 0 ? progress.totalCount : series.sermonCount
   const topicLabels = series.topicIds
     .map((id) => {
       const topic = topics.find((x) => x.id === id)
@@ -71,16 +108,21 @@ function SeriesCard({
           'hover:border-primary-200/80 dark:hover:border-primary-500/30'
         )}
       >
-        <div className="h-10 w-10 shrink-0 rounded-xl bg-primary-600/10 dark:bg-primary-400/10 flex items-center justify-center">
-          <ListMusic className="h-5 w-5 text-primary-700 dark:text-primary-200" strokeWidth={1.75} />
-        </div>
+        <SeriesThumbnail
+          src={series.thumbnailUrl}
+          title={seriesText.title}
+          className="h-14 w-14 shrink-0"
+        />
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-neutral-950 dark:text-neutral-50 truncate">
             {seriesText.title}
           </h3>
           <p className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 mt-0.5">
-            {series.sermonCount} sermons
+            {sermonCountShown} sermons
           </p>
+          {progress.totalCount > 0 ? (
+            <SeriesProgressStrip progress={progress} t={t} compact className="mt-2" />
+          ) : null}
         </div>
         <div className="shrink-0 flex items-center gap-2">
           <button
@@ -110,54 +152,63 @@ function SeriesCard({
   }
 
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-white/80 dark:hover:bg-neutral-950/60 transition-colors">
+    <div className="group relative overflow-hidden rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-white/80 dark:hover:bg-neutral-950/60 transition-colors flex flex-col">
       <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity bg-[radial-gradient(circle_at_20%_10%,rgba(139,92,246,0.08),transparent_45%),radial-gradient(circle_at_90%_80%,rgba(245,158,11,0.06),transparent_50%)]" />
-      <div className="relative p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary-600/10 dark:bg-primary-400/10 px-2.5 py-1 text-[11px] font-semibold text-primary-900 dark:text-primary-100">
-                <Sparkles className="h-3 w-3" strokeWidth={2} />
-                {t.series ?? 'Series'}
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 dark:bg-neutral-900 px-2.5 py-1 text-[11px] font-semibold text-neutral-700 dark:text-neutral-200">
-                <ListMusic className="h-3 w-3" strokeWidth={2} />
-                {series.sermonCount} sermons
-              </span>
+      <div className="relative p-5 sm:p-6 flex flex-col flex-1 min-h-0">
+        <SeriesThumbnail
+          src={series.thumbnailUrl}
+          title={seriesText.title}
+          className="mb-5 aspect-[16/9]"
+        />
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary-600/10 dark:bg-primary-400/10 px-2.5 py-1 text-[11px] font-semibold text-primary-900 dark:text-primary-100">
+                  <Sparkles className="h-3 w-3" strokeWidth={2} />
+                  {t.series ?? 'Series'}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 dark:bg-neutral-900 px-2.5 py-1 text-[11px] font-semibold text-neutral-700 dark:text-neutral-200">
+                  <ListMusic className="h-3 w-3" strokeWidth={2} />
+                  {sermonCountShown} sermons
+                </span>
+              </div>
+              <h3 className="mt-3 text-lg font-semibold tracking-tight text-neutral-950 dark:text-neutral-50">
+                {seriesText.title}
+              </h3>
+              <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed line-clamp-3">
+                {seriesText.description}
+              </p>
             </div>
-            <h3 className="mt-3 text-lg font-semibold tracking-tight text-neutral-950 dark:text-neutral-50">
-              {seriesText.title}
-            </h3>
-            <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed line-clamp-3">
-              {seriesText.description}
-            </p>
+
+            <button
+              type="button"
+              onClick={() => onToggleSave?.(!isSaved)}
+              className={cn(
+                'h-10 w-10 shrink-0 rounded-2xl border flex items-center justify-center transition-colors',
+                'border-neutral-200/70 dark:border-neutral-800/70',
+                'bg-white/60 dark:bg-neutral-950/40',
+                'hover:bg-neutral-50 dark:hover:bg-neutral-900',
+                isSaved && 'border-primary-200 dark:border-primary-500/40 bg-primary-600/10 dark:bg-primary-400/10'
+              )}
+              aria-label={isSaved ? (t.unsaveSeries ?? 'Unsave series') : (t.saveSeries ?? 'Save series')}
+            >
+              {isSaved ? (
+                <BookmarkCheck className="h-4 w-4 text-primary-700 dark:text-primary-200" strokeWidth={1.75} />
+              ) : (
+                <Bookmark className="h-4 w-4 text-neutral-600 dark:text-neutral-300" strokeWidth={1.75} />
+              )}
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onToggleSave?.(!isSaved)}
-            className={cn(
-              'h-10 w-10 shrink-0 rounded-2xl border flex items-center justify-center transition-colors',
-              'border-neutral-200/70 dark:border-neutral-800/70',
-              'bg-white/60 dark:bg-neutral-950/40',
-              'hover:bg-neutral-50 dark:hover:bg-neutral-900',
-              isSaved && 'border-primary-200 dark:border-primary-500/40 bg-primary-600/10 dark:bg-primary-400/10'
-            )}
-            aria-label={isSaved ? (t.unsaveSeries ?? 'Unsave series') : (t.saveSeries ?? 'Save series')}
-          >
-            {isSaved ? (
-              <BookmarkCheck className="h-4 w-4 text-primary-700 dark:text-primary-200" strokeWidth={1.75} />
-            ) : (
-              <Bookmark className="h-4 w-4 text-neutral-600 dark:text-neutral-300" strokeWidth={1.75} />
-            )}
-          </button>
-        </div>
+          {progress.totalCount > 0 ? (
+            <SeriesProgressStrip progress={progress} t={t} className="mt-3" />
+          ) : null}
 
-        {topicLabels.length > 0 ? (
-          <div className="mt-4 flex flex-wrap gap-1.5">
-          {topicLabels.slice(0, 3).map((label) => (
-            <span
-              key={label}
+          <div className={cn('mt-4 flex flex-wrap gap-1.5 min-h-[26px]', topicLabels.length === 0 && 'invisible')}>
+            {topicLabels.slice(0, 3).map((label) => (
+              <span
+                key={label}
                 className="inline-flex items-center gap-1 rounded-full bg-neutral-100 dark:bg-neutral-900 px-2 py-0.5 text-[11px] font-semibold text-neutral-700 dark:text-neutral-200"
               >
                 <Tag className="h-3 w-3 text-neutral-500 dark:text-neutral-400" strokeWidth={2} />
@@ -170,9 +221,9 @@ function SeriesCard({
               </span>
             ) : null}
           </div>
-        ) : null}
+        </div>
 
-        <div className="mt-5">
+        <div className="mt-5 shrink-0">
           <button
             type="button"
             onClick={onOpen}
@@ -210,6 +261,18 @@ export function SeriesBrowse({
     [data.series, savedSeriesIds]
   )
 
+  const progressBySeries = useMemo(
+    () => buildSeriesProgressMap(data.sermons, data.completedSermonIds),
+    [data.sermons, data.completedSermonIds]
+  )
+
+  const emptyProgress: SeriesProgress = {
+    totalCount: 0,
+    completedCount: 0,
+    percent: 0,
+    isComplete: false,
+  }
+
   return (
     <div className="w-full">
       <div className="mx-auto max-w-5xl">
@@ -220,7 +283,13 @@ export function SeriesBrowse({
               <div className="mb-3">
                 <button
                   type="button"
-                  onClick={() => onBack?.() ?? onOpenSeries?.(data.series[0]?.id ?? '')}
+                  onClick={() => {
+                    if (onBack) {
+                      onBack()
+                      return
+                    }
+                    onOpenSeries?.(data.series[0]?.id ?? '')
+                  }}
                   className="inline-flex items-center gap-1 rounded-full border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 px-3 py-1 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
@@ -256,7 +325,8 @@ export function SeriesBrowse({
                   topics={data.topics}
                   isSaved={true}
                   locale={locale}
-                t={t}
+                  progress={progressBySeries.get(series.id) ?? emptyProgress}
+                  t={t}
                   variant="compact"
                   onOpen={() => onOpenSeries?.(series.id)}
                   onToggleSave={(next) => onToggleSaveSeries?.(series.id, next)}
@@ -284,6 +354,7 @@ export function SeriesBrowse({
                 topics={data.topics}
                 isSaved={savedSeriesIds.has(series.id)}
                 locale={locale}
+                progress={progressBySeries.get(series.id) ?? emptyProgress}
                 t={t}
                 onOpen={() => onOpenSeries?.(series.id)}
                 onToggleSave={(next) => onToggleSaveSeries?.(series.id, next)}

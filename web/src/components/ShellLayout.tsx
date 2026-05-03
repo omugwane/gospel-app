@@ -2,12 +2,19 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import { useAuth } from '@/components/auth-context'
 import AppShell from '@/product/shell/components/AppShell'
 import {
   PreferencesProvider,
   type UiLanguage,
   type UiTheme,
+  type UserProfile,
 } from '@/components/preferences-context'
+import {
+  ensureFirebaseUserProfile,
+  updateFirebaseUserPreferences,
+  type FirebaseUserProfile,
+} from '@/lib/firebase/services'
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/' },
@@ -39,28 +46,32 @@ function isTheme(value: string): value is UiTheme {
 export default function ShellLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
+  const { status, user, signOutUser } = useAuth()
 
-  const [language, setLanguage] = useState<UiLanguage>('rw')
-  const [theme, setTheme] = useState<UiTheme>('system')
+  const [language, setLanguage] = useState<UiLanguage>(() => {
+    if (typeof window === 'undefined') {
+      return 'rw'
+    }
 
-  useEffect(() => {
     const savedLanguage = window.localStorage.getItem(STORAGE_KEYS.language)
-    if (savedLanguage && isLanguage(savedLanguage)) {
-      setLanguage(savedLanguage)
+    return savedLanguage && isLanguage(savedLanguage) ? savedLanguage : 'rw'
+  })
+  const [theme, setTheme] = useState<UiTheme>(() => {
+    if (typeof window === 'undefined') {
+      return 'system'
     }
 
     const savedTheme = window.localStorage.getItem(STORAGE_KEYS.theme)
-    if (savedTheme && isTheme(savedTheme)) {
-      setTheme(savedTheme)
-    }
-  }, [])
+    return savedTheme && isTheme(savedTheme) ? savedTheme : 'system'
+  })
+  const [firebaseProfile, setFirebaseProfile] = useState<FirebaseUserProfile | null>(null)
+  const hasLoadedTheme = useRef(false)
+  const hasLoadedRemotePreferences = useRef(status === 'ready' && !user)
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEYS.language, language)
     document.documentElement.lang = language
   }, [language])
-
-  const hasLoadedTheme = useRef(false)
 
   useEffect(() => {
     const applyTheme = (nextTheme: UiTheme) => {
@@ -88,6 +99,68 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
     return () => media.removeEventListener('change', onChange)
   }, [theme])
 
+  useEffect(() => {
+    let isCurrent = true
+
+    if (status !== 'ready') {
+      return undefined
+    }
+
+    if (!user) {
+      hasLoadedRemotePreferences.current = true
+      return undefined
+    }
+
+    hasLoadedRemotePreferences.current = false
+
+    void ensureFirebaseUserProfile(user)
+      .then((profile) => {
+        if (!isCurrent) {
+          return
+        }
+
+        setFirebaseProfile(profile)
+
+        if (profile?.preferredLanguage) {
+          setLanguage(profile.preferredLanguage)
+        }
+
+        if (profile?.preferredTheme) {
+          setTheme(profile.preferredTheme)
+        }
+
+        hasLoadedRemotePreferences.current = true
+      })
+      .catch(() => {
+        if (!isCurrent) {
+          return
+        }
+
+        setFirebaseProfile({
+          uid: user.uid,
+          email: user.email ?? null,
+          displayName: user.displayName ?? null,
+          photoURL: user.photoURL ?? null,
+        })
+        hasLoadedRemotePreferences.current = true
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [status, user])
+
+  useEffect(() => {
+    if (!user || !hasLoadedRemotePreferences.current) {
+      return
+    }
+
+    void updateFirebaseUserPreferences(user.uid, {
+      preferredLanguage: language,
+      preferredTheme: theme,
+    })
+  }, [language, theme, user])
+
   const navigationItems = NAV_ITEMS.map((item) => ({
     ...item,
     isActive:
@@ -96,25 +169,45 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
         : pathname.startsWith(item.href),
   }))
 
+  const preferenceUser: UserProfile = useMemo(
+    () => ({
+      name: user
+        ? firebaseProfile?.displayName?.trim() ||
+          user.displayName?.trim() ||
+          user.email?.trim() ||
+          'User'
+        : 'Guest',
+      avatarUrl: user ? firebaseProfile?.photoURL ?? user.photoURL ?? undefined : undefined,
+      email: user ? firebaseProfile?.email ?? user.email ?? undefined : undefined,
+    }),
+    [firebaseProfile, user]
+  )
+
   const preferencesValue = useMemo(
     () => ({
-      user: { name: 'Guest' },
+      user: preferenceUser,
       language,
       theme,
       setLanguage,
       setTheme,
       languageOptions: LANGUAGE_OPTIONS,
     }),
-    [language, theme]
+    [language, preferenceUser, theme]
   )
 
   return (
     <PreferencesProvider value={preferencesValue}>
       <AppShell
         navigationItems={navigationItems}
-        user={{ name: 'Guest' }}
+        user={preferenceUser}
         onNavigate={(href) => router.push(href)}
-        onLogout={() => {}}
+        onLogout={() => {
+          setFirebaseProfile(null)
+          hasLoadedRemotePreferences.current = true
+          void signOutUser().finally(() => {
+            router.replace('/login')
+          })
+        }}
         onOpenAccount={() => router.push('/account')}
       >
         {children}

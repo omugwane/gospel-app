@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import {
   ArrowRight,
   Bookmark,
@@ -12,18 +12,21 @@ import {
   Search,
   Sparkles,
   Tag,
+  Text,
   Video,
 } from 'lucide-react'
+import { buildSeriesProgressMap } from '@/lib/library-series-progress'
+import type { SeriesProgress } from '@/lib/library-series-progress'
 import { cn } from '@/lib/utils'
 import type {
   LibraryProps,
   LibraryTranslations,
-  SearchFilters,
   Series,
   Sermon,
   Topic,
 } from '@/product/sections/library/types'
 import { DEFAULT_LIBRARY_TRANSLATIONS } from '@/product/sections/library/types'
+import { SeriesProgressStrip } from '@/product/sections/library/components/SeriesProgressStrip'
 
 function formatDuration(totalSeconds: number) {
   if (!totalSeconds || totalSeconds <= 0) return '—'
@@ -41,10 +44,6 @@ function formatDate(iso: string) {
   } catch {
     return iso
   }
-}
-
-function uniq<T>(arr: T[]) {
-  return Array.from(new Set(arr))
 }
 
 function pickLabel(
@@ -73,6 +72,69 @@ function pickSermonText(sermon: Sermon, locale: string) {
     title: t?.title?.trim() || sermon.title,
     summary: t?.summary?.trim() || sermon.summary,
   }
+}
+
+function SeriesThumbnail({
+  src,
+  title,
+  className,
+}: {
+  src?: string
+  title: string
+  className?: string
+}) {
+  return (
+    <div
+      className={cn(
+        'relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-100 via-neutral-100 to-secondary-50 dark:from-primary-950/50 dark:via-neutral-900 dark:to-secondary-950/30',
+        className
+      )}
+    >
+      {src ? (
+        <img src={src} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <ListMusic className="h-10 w-10 text-neutral-300 dark:text-neutral-600" strokeWidth={1.4} />
+        </div>
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+      <div className="absolute bottom-3 left-3 right-3">
+        <div className="line-clamp-2 text-sm font-semibold text-white drop-shadow-sm">{title}</div>
+      </div>
+    </div>
+  )
+}
+
+function SermonThumbnail({
+  src,
+  title,
+  className,
+}: {
+  src?: string
+  title: string
+  className?: string
+}) {
+  return (
+    <div
+      className={cn(
+        'relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary-50 via-neutral-100 to-primary-50 dark:from-secondary-950/40 dark:via-neutral-900 dark:to-primary-950/40',
+        className
+      )}
+    >
+      {src ? (
+        <img src={src} alt="" className="h-full w-full object-cover" />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Headphones className="h-9 w-9 text-neutral-300 dark:text-neutral-600" strokeWidth={1.4} />
+        </div>
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+      <div className="absolute bottom-2 right-2 rounded-full bg-white/85 px-2 py-1 text-[10px] font-semibold text-neutral-700 shadow-sm dark:bg-neutral-950/80 dark:text-neutral-200">
+        Sermon
+      </div>
+      <span className="sr-only">{title}</span>
+    </div>
+  )
 }
 
 function Badge({
@@ -108,12 +170,12 @@ function AvailabilityBadges({ sermon, t }: { sermon: Sermon; t: LibraryTranslati
           <Headphones className="h-3 w-3" strokeWidth={2} />
           {t.audio ?? 'Audio'}
         </Badge>
-      ) : (
+      ) : a.hasTranscript ? (
         <Badge>
-          <Headphones className="h-3 w-3 opacity-60" strokeWidth={2} />
-          No audio
+          <Text className="h-3 w-3" strokeWidth={2} />
+          Transcript only
         </Badge>
-      )}
+      ) : null}
       {a.hasVideo ? (
         <Badge tone="secondary">
           <Video className="h-3 w-3" strokeWidth={2} />
@@ -161,6 +223,7 @@ function SeriesCard({
   isSaved,
   locale,
   t,
+  progress,
   onOpen,
   onToggleSave,
 }: {
@@ -169,10 +232,12 @@ function SeriesCard({
   isSaved: boolean
   locale: string
   t: LibraryTranslations
+  progress: SeriesProgress
   onOpen?: () => void
   onToggleSave?: (nextSaved: boolean) => void
 }) {
   const seriesText = pickSeriesText(series, locale)
+  const sermonCountShown = progress.totalCount > 0 ? progress.totalCount : series.sermonCount
   const topicLabels = series.topicIds
     .map((id) => {
       const topic = topics.find((x) => x.id === id)
@@ -182,48 +247,57 @@ function SeriesCard({
     .filter(Boolean) as string[]
 
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-white/80 dark:hover:bg-neutral-950/60 transition-colors">
+    <div className="group relative overflow-hidden rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-white/80 dark:hover:bg-neutral-950/60 transition-colors flex flex-col">
       <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity bg-[radial-gradient(circle_at_20%_10%,rgba(139,92,246,0.12),transparent_45%),radial-gradient(circle_at_90%_80%,rgba(245,158,11,0.10),transparent_50%)]" />
-      <div className="relative p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge tone="primary">
-                <Sparkles className="h-3 w-3" strokeWidth={2} />
-                {t.series ?? 'Series'}
-              </Badge>
-              <Badge>
-                <ListMusic className="h-3 w-3" strokeWidth={2} />
-                {series.sermonCount} sermons
-              </Badge>
+      <div className="relative p-5 sm:p-6 flex flex-col flex-1 min-h-0">
+        <SeriesThumbnail
+          src={series.thumbnailUrl}
+          title={seriesText.title}
+          className="mb-5 aspect-[16/9]"
+        />
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge tone="primary">
+                  <Sparkles className="h-3 w-3" strokeWidth={2} />
+                  {t.series ?? 'Series'}
+                </Badge>
+                <Badge>
+                  <ListMusic className="h-3 w-3" strokeWidth={2} />
+                  {sermonCountShown} sermons
+                </Badge>
+              </div>
+              <h3 className="mt-3 text-lg font-semibold tracking-tight text-neutral-950 dark:text-neutral-50">
+                {seriesText.title}
+              </h3>
+              <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed line-clamp-3">
+                {seriesText.description}
+              </p>
             </div>
-            <h3 className="mt-3 text-lg font-semibold tracking-tight text-neutral-950 dark:text-neutral-50">
-              {seriesText.title}
-            </h3>
-            <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed line-clamp-3">
-              {seriesText.description}
-            </p>
+
+            <button
+              type="button"
+              onClick={() => onToggleSave?.(!isSaved)}
+              className={cn(
+                'h-10 w-10 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors flex items-center justify-center',
+                isSaved && 'border-primary-200 dark:border-primary-500/40 bg-primary-600/10 dark:bg-primary-400/10'
+              )}
+              aria-label={isSaved ? (t.unsaveSeries ?? 'Unsave series') : (t.saveSeries ?? 'Save series')}
+            >
+              {isSaved ? (
+                <BookmarkCheck className="h-4 w-4 text-primary-700 dark:text-primary-200" strokeWidth={1.75} />
+              ) : (
+                <Bookmark className="h-4 w-4 text-neutral-600 dark:text-neutral-300" strokeWidth={1.75} />
+              )}
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onToggleSave?.(!isSaved)}
-            className={cn(
-              'h-10 w-10 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors flex items-center justify-center',
-              isSaved && 'border-primary-200 dark:border-primary-500/40 bg-primary-600/10 dark:bg-primary-400/10'
-            )}
-            aria-label={isSaved ? (t.unsaveSeries ?? 'Unsave series') : (t.saveSeries ?? 'Save series')}
-          >
-            {isSaved ? (
-              <BookmarkCheck className="h-4 w-4 text-primary-700 dark:text-primary-200" strokeWidth={1.75} />
-            ) : (
-              <Bookmark className="h-4 w-4 text-neutral-600 dark:text-neutral-300" strokeWidth={1.75} />
-            )}
-          </button>
-        </div>
+          {progress.totalCount > 0 ? (
+            <SeriesProgressStrip progress={progress} t={t} className="mt-3" />
+          ) : null}
 
-        {topicLabels.length > 0 ? (
-          <div className="mt-4 flex flex-wrap gap-1.5">
+          <div className={cn('mt-4 flex flex-wrap gap-1.5 min-h-[26px]', topicLabels.length === 0 && 'invisible')}>
             {topicLabels.slice(0, 3).map((t) => (
               <span
                 key={t}
@@ -239,9 +313,9 @@ function SeriesCard({
               </span>
             ) : null}
           </div>
-        ) : null}
+        </div>
 
-        <div className="mt-5 flex items-center justify-between gap-3">
+        <div className="mt-5 flex items-center justify-between gap-3 shrink-0">
           <button
             type="button"
             onClick={onOpen}
@@ -295,63 +369,74 @@ function SermonRow({
   const sermonText = pickSermonText(sermon, locale)
   return (
     <div className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-white/80 dark:hover:bg-neutral-950/60 transition-colors p-4 sm:p-5">
-      <div className="flex items-start justify-between gap-3">
-        <button type="button" onClick={onOpen} className="min-w-0 text-left">
-          <div className="flex flex-wrap items-center gap-2">
-            {recommended ? (
-              <Badge tone="secondary">
-                <Sparkles className="h-3 w-3" strokeWidth={2} />
-                {t.suggested ?? 'Suggested'}
-              </Badge>
-            ) : null}
-            {downloaded ? (
-              <Badge tone="secondary">
-                <Download className="h-3 w-3" strokeWidth={2} />
-                {t.offline ?? 'Offline'}
-              </Badge>
-            ) : null}
-            {isInQueue ? (
-              <Badge>
-                <ListMusic className="h-3 w-3" strokeWidth={2} />
-                {t.inQueue ?? 'In queue'}
-              </Badge>
-            ) : null}
-          </div>
-          <h4 className="mt-2 text-sm sm:text-base font-semibold text-neutral-950 dark:text-neutral-50 line-clamp-2">
-            {sermonText.title}
-          </h4>
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
-            <span>{formatDate(sermon.publishedAt)}</span>
-            <span className="opacity-50">•</span>
-            <span>{formatDuration(sermon.durationSeconds)}</span>
-            {seriesTitle ? (
-              <>
-                <span className="opacity-50">•</span>
-                <span className="text-neutral-700 dark:text-neutral-300">{seriesTitle}</span>
-              </>
-            ) : null}
-          </div>
-          <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed line-clamp-2">
-            {sermonText.summary}
-          </p>
+      <div className="flex items-start gap-4">
+        <button type="button" onClick={onOpen} className="shrink-0">
+          <SermonThumbnail
+            src={sermon.thumbnailUrl}
+            title={sermonText.title}
+            className="h-24 w-24 sm:h-28 sm:w-28"
+          />
         </button>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <button type="button" onClick={onOpen} className="min-w-0 text-left">
+              <div className="flex flex-wrap items-center gap-2">
+                {recommended ? (
+                  <Badge tone="secondary">
+                    <Sparkles className="h-3 w-3" strokeWidth={2} />
+                    {t.suggested ?? 'Suggested'}
+                  </Badge>
+                ) : null}
+                {downloaded ? (
+                  <Badge tone="secondary">
+                    <Download className="h-3 w-3" strokeWidth={2} />
+                    {t.offline ?? 'Offline'}
+                  </Badge>
+                ) : null}
+                {isInQueue ? (
+                  <Badge>
+                    <ListMusic className="h-3 w-3" strokeWidth={2} />
+                    {t.inQueue ?? 'In queue'}
+                  </Badge>
+                ) : null}
+              </div>
+              <h4 className="mt-2 text-sm sm:text-base font-semibold text-neutral-950 dark:text-neutral-50 line-clamp-2">
+                {sermonText.title}
+              </h4>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
+                <span>{formatDate(sermon.publishedAt)}</span>
+                <span className="opacity-50">•</span>
+                <span>{formatDuration(sermon.durationSeconds)}</span>
+                {seriesTitle ? (
+                  <>
+                    <span className="opacity-50">•</span>
+                    <span className="text-neutral-700 dark:text-neutral-300">{seriesTitle}</span>
+                  </>
+                ) : null}
+              </div>
+              <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed line-clamp-2">
+                {sermonText.summary}
+              </p>
+            </button>
 
-        <div className="shrink-0 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => onToggleSave?.(!isSaved)}
-            className={cn(
-              'h-10 w-10 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors flex items-center justify-center',
-              isSaved && 'border-primary-200 dark:border-primary-500/40 bg-primary-600/10 dark:bg-primary-400/10'
-            )}
-            aria-label={isSaved ? (t.unsaveSermon ?? 'Unsave sermon') : (t.saveSermon ?? 'Save sermon')}
-          >
-            {isSaved ? (
-              <BookmarkCheck className="h-4 w-4 text-primary-700 dark:text-primary-200" strokeWidth={1.75} />
-            ) : (
-              <Bookmark className="h-4 w-4 text-neutral-600 dark:text-neutral-300" strokeWidth={1.75} />
-            )}
-          </button>
+            <div className="shrink-0 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onToggleSave?.(!isSaved)}
+                className={cn(
+                  'h-10 w-10 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors flex items-center justify-center',
+                  isSaved && 'border-primary-200 dark:border-primary-500/40 bg-primary-600/10 dark:bg-primary-400/10'
+                )}
+                aria-label={isSaved ? (t.unsaveSermon ?? 'Unsave sermon') : (t.saveSermon ?? 'Save sermon')}
+              >
+                {isSaved ? (
+                  <BookmarkCheck className="h-4 w-4 text-primary-700 dark:text-primary-200" strokeWidth={1.75} />
+                ) : (
+                  <Bookmark className="h-4 w-4 text-neutral-600 dark:text-neutral-300" strokeWidth={1.75} />
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -451,19 +536,12 @@ export function LibraryHome({
   onBrowseAllSeries,
   onOpenTopic,
   onOpenSermon,
-  onPlaySermonAudio,
-  onWatchSermonVideo,
-  onDownloadSermon,
-  onToggleSaveSermon,
   onToggleSaveSeries,
-  onAddToQueue,
-  onMarkSermonCompleted,
   onSearch,
-  onUpdateSearchFilters,
   onOpenDownloads,
+  onOpenSavedSermons,
 }: LibraryProps) {
-  const [query, setQuery] = useState(data.searchState.query)
-  const [filters, setFilters] = useState<SearchFilters>(data.searchState.filters)
+  const [query, setQuery] = useState('')
 
   const t = useMemo(
     () => ({ ...DEFAULT_LIBRARY_TRANSLATIONS, ...translationsProp }),
@@ -471,70 +549,30 @@ export function LibraryHome({
   )
 
   const savedSeries = useMemo(() => new Set(data.saved.savedSeriesIds), [data.saved.savedSeriesIds])
-  const savedSermons = useMemo(() => new Set(data.saved.savedSermonIds), [data.saved.savedSermonIds])
-  const queue = useMemo(() => new Set(data.listeningQueue.queueSermonIds), [data.listeningQueue.queueSermonIds])
+  const savedSermonCount = data.saved.savedSermonIds.length
+  const previewSeries = data.series.slice(0, 2)
 
-  const seriesById = useMemo(() => new Map(data.series.map((s) => [s.id, s])), [data.series])
-  const topicById = useMemo(() => new Map(data.topics.map((t) => [t.id, t])), [data.topics])
+  const progressBySeries = useMemo(
+    () => buildSeriesProgressMap(data.sermons, data.completedSermonIds),
+    [data.sermons, data.completedSermonIds]
+  )
 
-  const recentQueries = data.searchState.recentQueries
-
-  const activeSeries = filters.seriesId ? seriesById.get(filters.seriesId) : null
-  const activeTopic = filters.topicId ? topicById.get(filters.topicId) : null
-
-  const hasFilters =
-    Boolean(filters.seriesId) ||
-    Boolean(filters.topicId) ||
-    filters.hasVideo !== null ||
-    filters.hasTranscript !== null
-
-  const applyFilters = (next: SearchFilters) => {
-    setFilters(next)
-    onUpdateSearchFilters?.(next)
+  const emptyProgress: SeriesProgress = {
+    totalCount: 0,
+    completedCount: 0,
+    percent: 0,
+    isComplete: false,
   }
 
-  const triggerSearch = (q: string) => {
-    setQuery(q)
-    onSearch?.(q)
+  const handleSearchSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    onSearch?.(query.trim())
   }
-
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    let list = data.sermons
-
-    if (filters.seriesId) list = list.filter((s) => s.seriesId === filters.seriesId)
-    if (filters.topicId) list = list.filter((s) => s.topicIds.includes(filters.topicId as string))
-    if (filters.hasAudio !== null) list = list.filter((s) => s.availability.hasAudio === filters.hasAudio)
-    if (filters.hasVideo !== null) list = list.filter((s) => s.availability.hasVideo === filters.hasVideo)
-    if (filters.hasTranscript !== null)
-      list = list.filter((s) => s.availability.hasTranscript === filters.hasTranscript)
-
-    if (!q) return list
-    return list.filter((s) => {
-      const hay = [
-        s.title,
-        s.summary,
-        ...s.scriptureReferences,
-        s.notes?.transcript ?? '',
-      ]
-        .join(' ')
-        .toLowerCase()
-      return hay.includes(q)
-    })
-  }, [data.sermons, filters, query])
-
-  const highlightedIds = useMemo(() => uniq([...data.listeningQueue.queueSermonIds, ...data.saved.savedSermonIds]).slice(0, 3), [
-    data.listeningQueue.queueSermonIds,
-    data.saved.savedSermonIds,
-  ])
-  const highlighted = highlightedIds
-    .map((id) => data.sermons.find((s) => s.id === id))
-    .filter(Boolean) as Sermon[]
 
   return (
     <div className="w-full">
       <div className="mx-auto max-w-5xl">
-        {/* Title + search */}
+        {/* Title + search entrypoint */}
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0">
             <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-950 dark:text-neutral-50">
@@ -566,36 +604,54 @@ export function LibraryHome({
                 </>
               ) : null}
             </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onOpenSavedSermons?.()}
+                className="inline-flex items-center gap-2 rounded-full border border-primary-200/70 bg-primary-600/10 px-3 py-1.5 text-xs font-semibold text-primary-900 transition-colors hover:bg-primary-600/15 dark:border-primary-500/30 dark:bg-primary-400/10 dark:text-primary-100 dark:hover:bg-primary-400/15"
+              >
+                <BookmarkCheck className="h-3.5 w-3.5" strokeWidth={1.75} />
+                Saved sermons
+                <span className="rounded-full bg-white/70 px-1.5 py-0.5 text-[10px] text-primary-900 dark:bg-neutral-950/40 dark:text-primary-100">
+                  {savedSermonCount}
+                </span>
+              </button>
+              {data.listeningQueue.queueSermonIds.length ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/60 px-3 py-1.5 text-xs font-semibold text-neutral-600 dark:bg-neutral-950/40 dark:text-neutral-300">
+                  <ListMusic className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  {data.listeningQueue.queueSermonIds.length} queued
+                </span>
+              ) : null}
+            </div>
           </div>
 
           <div className="w-full md:max-w-md">
-            <div className="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/70 dark:bg-neutral-950/40 px-3 py-2 flex items-center gap-2">
+            <form onSubmit={handleSearchSubmit} className="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/70 dark:bg-neutral-950/40 px-3 py-2 flex items-center gap-2">
               <Search className="h-4 w-4 text-neutral-500 dark:text-neutral-400" strokeWidth={1.75} />
               <input
                 value={query}
-                onChange={(e) => triggerSearch(e.target.value)}
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder={t.searchPlaceholder ?? 'Search: title, summary, scripture, notes…'}
                 className="w-full bg-transparent outline-none text-sm text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400"
               />
               <button
-                type="button"
-                onClick={() => triggerSearch(query)}
+                type="submit"
                 className="rounded-xl bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-700 transition-colors"
               >
                 {t.search ?? 'Search'}
               </button>
-            </div>
+            </form>
 
-            {recentQueries?.length ? (
+            {data.searchState.recentQueries?.length ? (
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <span className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
                   Recent:
                 </span>
-                {recentQueries.slice(0, 4).map((q) => (
+                {data.searchState.recentQueries.slice(0, 4).map((q) => (
                   <button
                     key={q}
                     type="button"
-                    onClick={() => triggerSearch(q)}
+                    onClick={() => onSearch?.(q)}
                     className="text-[11px] font-semibold text-primary-700 dark:text-primary-200 hover:underline"
                   >
                     {q}
@@ -606,124 +662,26 @@ export function LibraryHome({
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          <PillButton
-            active={filters.hasAudio === true}
-            onClick={() => applyFilters({ ...filters, hasAudio: filters.hasAudio === true ? null : true })}
-          >
-            <span className="inline-flex items-center gap-1.5">
-              <Headphones className="h-4 w-4" strokeWidth={1.75} />
-              Audio
-            </span>
-          </PillButton>
-          <PillButton
-            active={filters.hasVideo === true}
-            onClick={() => applyFilters({ ...filters, hasVideo: filters.hasVideo === true ? null : true })}
-          >
-            <span className="inline-flex items-center gap-1.5">
-              <Video className="h-4 w-4" strokeWidth={1.75} />
-              Video
-            </span>
-          </PillButton>
-          <PillButton
-            active={filters.hasTranscript === true}
-            onClick={() =>
-              applyFilters({ ...filters, hasTranscript: filters.hasTranscript === true ? null : true })
-            }
-          >
-            <span className="inline-flex items-center gap-1.5">
-              <BookOpen className="h-4 w-4" strokeWidth={1.75} />
-              Notes
-            </span>
-          </PillButton>
-
-          <div className="h-6 w-px bg-neutral-200 dark:bg-neutral-800 mx-1" />
-
-          <span className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
-            Series:
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {data.series.slice(0, 3).map((s) => (
-              <PillButton
-                key={s.id}
-                active={filters.seriesId === s.id}
-                onClick={() => applyFilters({ ...filters, seriesId: filters.seriesId === s.id ? null : s.id })}
-              >
-                {s.title}
-              </PillButton>
-            ))}
-          </div>
-
-          <span className="ml-auto text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
-            {results.length} results
-          </span>
-          {hasFilters || query.trim() ? (
+        {/* Series preview + Topics */}
+        <section className="mt-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs font-semibold tracking-wide text-neutral-700 dark:text-neutral-300 uppercase">
+                Featured series
+              </div>
+              <div className="mt-1 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
+                Previewing {previewSeries.length} of {data.series.length} series
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => {
-                triggerSearch('')
-                applyFilters({ seriesId: null, topicId: null, hasAudio: true, hasVideo: null, hasTranscript: null })
+                if (onBrowseAllSeries) {
+                  onBrowseAllSeries()
+                  return
+                }
+                onOpenSeries?.(data.series[0]?.id ?? '')
               }}
-              className="text-[11px] font-semibold text-neutral-600 dark:text-neutral-300 hover:underline"
-            >
-              Reset
-            </button>
-          ) : null}
-        </div>
-
-        {/* Highlights */}
-        {highlighted.length ? (
-          <section className="mt-6">
-            <div className="flex items-center justify-between">
-              <div className="text-xs font-semibold tracking-wide text-neutral-700 dark:text-neutral-300 uppercase">
-                Continue listening
-              </div>
-              <span className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
-                Queue + saved
-              </span>
-            </div>
-            <div className="mt-3 grid gap-3 md:grid-cols-3">
-              {highlighted.map((s) => (
-                <div
-                  key={s.id}
-                  className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 p-4 hover:bg-white/80 dark:hover:bg-neutral-950/60 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <button type="button" onClick={() => onOpenSermon?.(s.id)} className="min-w-0 text-left">
-                      <div className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
-                        {formatDuration(s.durationSeconds)}
-                      </div>
-                      <div className="mt-1 text-sm font-semibold text-neutral-950 dark:text-neutral-50 line-clamp-2">
-                        {pickSermonText(s, locale).title}
-                      </div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onPlaySermonAudio?.(s.id)}
-                      className="rounded-xl bg-primary-600 px-3 py-2 text-xs font-semibold text-white hover:bg-primary-700 transition-colors"
-                    >
-                      {t.play ?? 'Play'}
-                    </button>
-                  </div>
-                  <div className="mt-3">
-                    <AvailabilityBadges sermon={s} t={t} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {/* Series + Topics */}
-        <section className="mt-8">
-          <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold tracking-wide text-neutral-700 dark:text-neutral-300 uppercase">
-              Browse
-            </div>
-            <button
-              type="button"
-              onClick={() => onBrowseAllSeries?.() ?? onOpenSeries?.(data.series[0]?.id ?? '')}
               className="text-[11px] font-semibold text-primary-700 dark:text-primary-200 hover:underline inline-flex items-center gap-1"
             >
               View all series
@@ -732,13 +690,14 @@ export function LibraryHome({
           </div>
 
           <div className="mt-3 grid gap-3 md:grid-cols-2">
-            {data.series.map((s) => (
+            {previewSeries.map((s) => (
               <SeriesCard
                 key={s.id}
                 series={s}
                 topics={data.topics}
                 isSaved={savedSeries.has(s.id)}
                 locale={locale}
+                progress={progressBySeries.get(s.id) ?? emptyProgress}
                 t={t}
                 onOpen={() => onOpenSeries?.(s.id)}
                 onToggleSave={(next) => onToggleSaveSeries?.(s.id, next)}
@@ -750,22 +709,18 @@ export function LibraryHome({
             <div className="flex items-center justify-between">
               <div className="text-sm font-semibold text-neutral-950 dark:text-neutral-50">Topics</div>
               <div className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
-                Tap to filter results
+                Tap to search by topic
               </div>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {data.topics.map((t) => (
+              {data.topics.map((tp) => (
                 <PillButton
-                  key={t.id}
-                  active={filters.topicId === t.id}
-                  onClick={() => {
-                    applyFilters({ ...filters, topicId: filters.topicId === t.id ? null : t.id })
-                    onOpenTopic?.(t.id)
-                  }}
+                  key={tp.id}
+                  onClick={() => onOpenTopic?.(tp.id)}
                 >
                   <span className="inline-flex items-center gap-1.5">
                     <Tag className="h-4 w-4" strokeWidth={1.75} />
-                    {pickLabel(t.label, t.translations?.[locale as 'en' | 'fr'], locale)}
+                    {pickLabel(tp.label, tp.translations?.[locale as 'en' | 'fr'], locale)}
                   </span>
                 </PillButton>
               ))}
@@ -773,90 +728,49 @@ export function LibraryHome({
           </div>
         </section>
 
-        {/* Results list (search preview) */}
+        {/* Recent sermons preview */}
         <section className="mt-8 pb-10">
           <div className="flex items-center justify-between">
             <div className="text-xs font-semibold tracking-wide text-neutral-700 dark:text-neutral-300 uppercase">
-              Results
+              Recent teachings
             </div>
-            <div className="flex items-center gap-2">
-              {activeSeries ? (
-                <Badge>
-                  <Sparkles className="h-3 w-3" strokeWidth={2} />
-                  {pickSeriesText(activeSeries, locale).title}
-                </Badge>
-              ) : null}
-              {activeTopic ? (
-                <Badge>
-                  <Tag className="h-3 w-3" strokeWidth={2} />
-                  {pickLabel(activeTopic.label, activeTopic.translations?.[locale as 'en' | 'fr'], locale)}
-                </Badge>
-              ) : null}
-            </div>
+            <button
+              type="button"
+              onClick={() => onSearch?.('')}
+              className="text-[11px] font-semibold text-primary-700 dark:text-primary-200 hover:underline inline-flex items-center gap-1"
+            >
+              View all
+              <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.75} />
+            </button>
           </div>
 
-          {results.length === 0 ? (
-            <div className="mt-3 rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/60 dark:bg-neutral-950/40 p-6">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-2xl bg-secondary-50 dark:bg-secondary-500/10 flex items-center justify-center">
-                  <Search className="h-5 w-5 text-secondary-800 dark:text-secondary-200" strokeWidth={1.75} />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-neutral-950 dark:text-neutral-50">No results</div>
-                  <div className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-                    Try a different keyword (e.g. <span className="font-semibold">Isengesho</span>) or clear filters.
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-3 grid gap-3">
-              {results.slice(0, 5).map((s) => {
-                const series = s.seriesId ? seriesById.get(s.seriesId) : null
-                const seriesTitle = series ? pickSeriesText(series, locale).title : undefined
-                const topicLabels = s.topicIds
-                  .map((id) => {
-                    const t = topicById.get(id)
-                    if (!t) return null
-                    return pickLabel(t.label, t.translations?.[locale as 'en' | 'fr'], locale)
-                  })
-                  .filter(Boolean) as string[]
+          <div className="mt-3 grid gap-3">
+            {data.sermons.slice(0, 3).map((s) => {
+              const series = s.seriesId ? data.series.find((sr) => sr.id === s.seriesId) : null
+              const seriesTitle = series ? pickSeriesText(series, locale).title : undefined
+              const topicLabels = s.topicIds
+                .map((id) => {
+                  const tp = data.topics.find((x) => x.id === id)
+                  if (!tp) return null
+                  return pickLabel(tp.label, tp.translations?.[locale as 'en' | 'fr'], locale)
+                })
+                .filter(Boolean) as string[]
 
-                return (
-                  <SermonRow
-                    key={s.id}
-                    sermon={s}
-                    seriesTitle={seriesTitle}
-                    topicLabels={topicLabels}
-                    isSaved={savedSermons.has(s.id)}
-                    isInQueue={queue.has(s.id)}
-                    locale={locale}
-                    t={t}
-                    onOpen={() => onOpenSermon?.(s.id)}
-                    onPlay={() => onPlaySermonAudio?.(s.id)}
-                    onWatch={() => onWatchSermonVideo?.(s.id)}
-                    onDownload={() => onDownloadSermon?.(s.id)}
-                    onToggleSave={(next) => onToggleSaveSermon?.(s.id, next)}
-                    onAddToQueue={() => onAddToQueue?.(s.id)}
-                    onMarkCompleted={(completed) => onMarkSermonCompleted?.(s.id, completed)}
-                  />
-                )
-              })}
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">
-                  Showing 5 of {results.length}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onOpenSermon?.(results[0]?.id ?? '')}
-                  className="text-[11px] font-semibold text-primary-700 dark:text-primary-200 hover:underline inline-flex items-center gap-1"
-                >
-                  Open a result
-                  <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.75} />
-                </button>
-              </div>
-            </div>
-          )}
+              return (
+                <SermonRow
+                  key={s.id}
+                  sermon={s}
+                  seriesTitle={seriesTitle}
+                  topicLabels={topicLabels}
+                  isSaved={data.saved.savedSermonIds.includes(s.id)}
+                  isInQueue={data.listeningQueue.queueSermonIds.includes(s.id)}
+                  locale={locale}
+                  t={t}
+                  onOpen={() => onOpenSermon?.(s.id)}
+                />
+              )
+            })}
+          </div>
         </section>
       </div>
     </div>

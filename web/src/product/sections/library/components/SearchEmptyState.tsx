@@ -100,7 +100,7 @@ export function SearchEmptyState({
     applyFilters({
       seriesId: null,
       topicId: null,
-      hasAudio: true,
+      hasAudio: null,
       hasVideo: null,
       hasTranscript: null,
     })

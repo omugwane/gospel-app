@@ -1,6 +1,9 @@
 .DS_Store
 *.pem
 
+# root Firebase CLI (see package.json / firebaserc.example)
+node_modules/
+
 # logs
 npm-debug.log*
 yarn-debug.log*

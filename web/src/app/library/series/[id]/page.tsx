@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation'
 import ShellLayout from '@/components/ShellLayout'
 import LibrarySeriesIdClient from '@/components/LibrarySeriesIdClient'
 import { getLibraryData } from '@/lib/mappers/library'
@@ -9,10 +10,13 @@ export default async function LibrarySeriesIdPage({
 }) {
   const { id } = await params
   const data = await getLibraryData()
-  const locale = (data.viewer.preferredLanguage ?? 'rw') as 'rw' | 'en' | 'fr'
+  const series = data.series.find((s) => s.id === id)
+  if (!series) {
+    notFound()
+  }
   return (
     <ShellLayout>
-      <LibrarySeriesIdClient data={data} seriesId={id} locale={locale} />
+      <LibrarySeriesIdClient data={data} seriesId={id} />
     </ShellLayout>
   )
 }
